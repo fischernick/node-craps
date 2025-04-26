@@ -43,15 +43,6 @@ export class BetDictionary {
         this.newBetSum += amount;
     }
 
-    // /**
-    //  * Get the amount of a bet
-    //  * @param betPoint The type of bet
-    //  * @returns The amount of the bet, or 0 if no bet exists
-    //  */
-    // getBetAmount(betPoint: BetPoint): number {
-    //     return this[betPoint]?.amount || 0;
-    // }
-
     /**
      * Get a bet
      * @param betPoint The type of bet
@@ -97,4 +88,4 @@ export class BetDictionary {
             };
         });
     }
-} 
+}
