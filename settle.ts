@@ -33,23 +33,24 @@ export function passOdds(bets: BetDictionary, hand: Result, rules: Rules) {
 
   if (!betHasAction) return { bets } // keep bets intact if no action
 
+  bets.clearBet(passOddsPoint) // clear pass line bet on action
+
+  if (hand.result === HandResult.SEVEN_OUT) return { bets }
+
   const payout = {
     type: 'pass odds win',
     principal: bets.getBet(passOddsPoint)?.amount ?? 0,
     profit: (bets.getBet(passOddsPoint)?.amount ?? 0) * getPayout(passOddsPoint, hand.diceSum)
   }
 
-  bets.clearBet(passOddsPoint) // clear pass line bet on action
-  
-
-  if (hand.result === HandResult.SEVEN_OUT) return { bets }
-
   return { payout, bets }
 }
 
 export function getPayout(betPoint: BetPoint, diceSum: DiceResult) {
   const payouts = BetPointPayouts[betPoint]
-  if (!payouts || !payouts[diceSum]) throw new Error("no payouts defined for bet point")
+  if (!payouts || !payouts[diceSum]) {
+    throw new Error(`no payouts defined for bet point for dice sum`)
+  }
 
   return payouts[diceSum]
 }

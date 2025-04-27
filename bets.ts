@@ -88,4 +88,54 @@ export class BetDictionary {
             };
         });
     }
+
+    displayTable(): void {
+        const pf = (value: BetPoint): string => {
+            if (value === undefined) {
+                return "     ";
+            }
+            const bet = this.getBet(value);
+            if (bet === undefined) {
+                return "     ";
+            }
+            return "$" + bet.amount.toString().padStart(4, ' ');
+        }
+
+        let table = '';
+        table += `+-+------+------+------+------+------+------+------+\n`;
+        table += `| |  DC  |   4  |   5  |   6  |   8  |   9  |  10  |\n`;
+        table += `|B|      |      |      |      |      |      |      |\n`;
+        table += `|O|      |      |      |      |      |      |      |\n`;
+        table += `+-+------+------+------+------+------+------+------+\n`;
+        table += `/ /     Field:           ||  COME:                 |\n`;
+        table += `/ / Dont Pass:           ||  PASS LINE: ${pf(BetPoint.Pass)}      |\n`;
+        table += `/ /   DP Odds:           ||    PL Odds: ${pf(BetPoint.PassOdds)}      |\n`;
+        table += `\\================================================//\n`;
+        console.log(table);
+    }
 }
+
+/*
+const CRAPS_TABLE_ASCII = `
+    Don't Pass Bar -------|  Field  |-------- Don't Come Bar
+    [===========================================]
+    |                 COME                      |
+    |------------------------------------------|
+    |         4    5    6    8    9   10       |
+    |        [4]  [5]  [6]  [8]  [9]  [10]    |
+    |------------------------------------------|
+    |                 PASS LINE                 |
+    [===========================================]
+    |              PLAYER POSITION              |
+`;
+
++-+-----+------+------+------+------+------+------+
+| | DC  |   4  |   5  |   6  |   8  |   9  |  10  |
+|P|     |      |      |      |      |      |      |
+|O|     |      |      |      |      |      |      |
++-+-----+------+------+------+------+------+------+
+/ /     Field:        |||  COME:                  |
+/ / Dont Pass:        |||  PASS LINE:             |
+/ /   DP Odds:        |||    PL Odds:             |
+\\===============================================//
+*/

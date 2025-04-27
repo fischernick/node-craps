@@ -79,7 +79,7 @@ export function playHand ( rules: any, bettingStrategy: BettingStrategy, roll = 
     bets.newBetSum = 0
 
 
-    if (process.env.DEBUG) console.log(`[table] all bets ${inspect(bets, false, 2)}`)
+    if (process.env.DEBUG) bets.displayTable();
 
     hand = shoot(
       hand,
