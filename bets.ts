@@ -115,7 +115,7 @@ export class BetDictionary {
     }
 }
 
-/*
+/* ideas
 const CRAPS_TABLE_ASCII = `
     Don't Pass Bar -------|  Field  |-------- Don't Come Bar
     [===========================================]
