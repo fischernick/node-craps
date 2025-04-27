@@ -1,4 +1,4 @@
-import { BetPoint, Memo } from './consts';
+import { BetPoint, Memo, Point } from './consts';
 
 export type Bet = {
     amount: number;
@@ -89,30 +89,7 @@ export class BetDictionary {
         });
     }
 
-    displayTable(): void {
-        const pf = (value: BetPoint): string => {
-            if (value === undefined) {
-                return "     ";
-            }
-            const bet = this.getBet(value);
-            if (bet === undefined) {
-                return "     ";
-            }
-            return "$" + bet.amount.toString().padStart(4, ' ');
-        }
 
-        let table = '';
-        table += `+-+------+------+------+------+------+------+------+\n`;
-        table += `| |  DC  |   4  |   5  |   6  |   8  |   9  |  10  |\n`;
-        table += `|B|      |      |      |      |      |      |      |\n`;
-        table += `|O|      |      |      |      |      |      |      |\n`;
-        table += `+-+------+------+------+------+------+------+------+\n`;
-        table += `/ /     Field:           ||  COME:                 |\n`;
-        table += `/ / Dont Pass:           ||  PASS LINE: ${pf(BetPoint.Pass)}      |\n`;
-        table += `/ /   DP Odds:           ||    PL Odds: ${pf(BetPoint.PassOdds)}      |\n`;
-        table += `\\================================================//\n`;
-        console.log(table);
-    }
 }
 
 /* ideas

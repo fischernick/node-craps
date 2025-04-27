@@ -2,7 +2,7 @@ import { inspect } from 'node:util'
 
 import { settleAllBets } from './settle'
 import { HandOptions, minPassLineMaxOdds, minPassLineOnly} from './betting'
-import { HandResult, type Result, Point, diceResultAsPoint, DieResult, DiceResult } from "./consts"
+import { HandResult, type Result, Point, diceResultAsPoint, DieResult, DiceResult, BetPoint } from "./consts"
 import { BetDictionary } from "./bets"
 
 export function rollD6() {
@@ -79,7 +79,7 @@ export function playHand ( rules: any, bettingStrategy: BettingStrategy, roll = 
     bets.newBetSum = 0
 
 
-    if (process.env.DEBUG) bets.displayTable();
+    displayTable(bets, hand.point, balance);
 
     hand = shoot(
       hand,
@@ -103,7 +103,50 @@ export function playHand ( rules: any, bettingStrategy: BettingStrategy, roll = 
   return { history, balance }
 }
 
+export function buildHeaderLine(point: Point): string {
+  let headerLine = '┃ ┃';
+  const points = ['DC', '4', '5', '6', '8', '9', '10'];
+  const pointValues = [Point.OFF, Point.FOUR, Point.FIVE, Point.SIX, Point.EIGHT, Point.NINE, Point.TEN];
+
+  points.forEach((p, i) => {
+    const isPoint = point === pointValues[i] || (i === 0 && point === Point.UNDEF);
+    // "      "
+    const prePad = (p === 'DC' || p === '10') ? ' ' : '  ';
+    headerLine += isPoint ? `${prePad}*${p}  ┃` : `${prePad} ${p}  ┃`;
+  });
+
+  return headerLine;
+}
+
+function displayTable(bets: BetDictionary, point: Point, balance: number): void {
+  const pf = (value: BetPoint): string => {
+    if (value === undefined) {
+      return "     ";
+    }
+    const bet = bets.getBet(value);
+    if (bet === undefined) {
+      return "     ";
+    }
+    return "$" + bet.amount.toString().padStart(4, ' ');
+  }
+
+  let table = '';
+  table += `┏━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┓\n`;
+  table += buildHeaderLine(point) + '\n';
+  table += `┃B┃      ┃      ┃      ┃      ┃      ┃      ┃      ┃\n`;
+  table += `┃O┃      ┃      ┃      ┃      ┃      ┃      ┃      ┃\n`;
+  table += `┡━╇━━━━━━┻━━━━━━┻━━━━━━╬━━━━━━┻━━━━━━┻━━━━━━┻━━━━━━┩\n`;
+  table += `│ ┇     Field:         ║     COME:                 │\n`;
+  table += `│ ┇ Dont Pass:         ║     PASS LINE: ${pf(BetPoint.Pass)}      │\n`;
+  table += `│ ┇   DP Odds:         ║       PL Odds: ${pf(BetPoint.PassOdds)}      │\n`;
+  table += `╘═╧════════════════════╩═══════════════════════════╛\n`;
+  table += `╲ ╲ Balance: ${balance.toString().padStart(4, ' ')}  \n`;
+  table += `                                                    \n`;
+  console.log(table);
+}
+
 module.exports = {
+  buildHeaderLine,
   rollD6,
   shoot,
   playHand,
