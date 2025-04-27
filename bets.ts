@@ -33,12 +33,25 @@ export class BetDictionary {
         this.newBetSum = 0;
     }
 
+    copy(): BetDictionary {
+        const copy = new BetDictionary()
+        Object.values(BetPoint).forEach(value => {
+            if (typeof value === 'number') {
+                copy.addBet(value, this[value].amount)
+            }
+        })
+        return copy
+    }
+
     /**
      * Add a bet to the dictionary
      * @param betPoint The type of bet
      * @param amount The amount of the bet
      */
     addBet(betPoint: BetPoint, amount: number): void {
+        if (amount === 0) {
+            return;
+        }
         this[betPoint] = { amount, isContract: false, set: true };
         this.newBetSum += amount;
     }

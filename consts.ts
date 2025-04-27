@@ -81,6 +81,18 @@ enum BetPoint {
     DontPassOdds = 5,
     DontCome = 6,
     DontComeOdds = 7,
+    Place4 = 8,
+    Place5 = 9,
+    Place6 = 10,
+    Place8 = 11,
+    Place9 = 12,
+    Place10 = 13,
+    DontComePoint4 = 14,
+    DontComePoint5 = 15,
+    DontComePoint6 = 16,
+    DontComePoint8 = 17,
+    DontComePoint9 = 18,
+    DontComePoint10 = 19,
 }
 
 /**
@@ -112,15 +124,22 @@ const passPayouts: PayoutMap = {
     [DiceResult.TEN]: 1,
 }
 
+const dontComePayouts: PayoutMap = {
+    [DiceResult.TWO]: 1,
+    [DiceResult.THREE]: 1,
+    [DiceResult.SEVEN]: 1,
+    [DiceResult.ELEVEN]: 1,
+}
+
 const BetPointPayouts: Partial<Record<BetPoint, PayoutMap>> = {
     [BetPoint.Pass]: passPayouts,
     [BetPoint.PassOdds]: passOddsPayouts,
-    [BetPoint.Come]: passOddsPayouts,
-    [BetPoint.ComeOdds]: passOddsPayouts,
-    [BetPoint.DontPass]: passOddsPayouts,
-    [BetPoint.DontPassOdds]: passOddsPayouts,
-    [BetPoint.DontCome]: passOddsPayouts,
-    [BetPoint.DontComeOdds]: passOddsPayouts,
+    //[BetPoint.Come]: passOddsPayouts,
+    //[BetPoint.ComeOdds]: passOddsPayouts,
+    //[BetPoint.DontPass]: passOddsPayouts,
+    //[BetPoint.DontPassOdds]: passOddsPayouts,
+    [BetPoint.DontCome]: dontComePayouts,
+    //[BetPoint.DontComeOdds]: passOddsPayouts, // DNE: dont come odds are once placed on a point.
 };
 
 interface Rules {

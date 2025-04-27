@@ -49,7 +49,7 @@ class Summary  {
 
 
 const sessionSummary = new Summary();
-
+sessionSummary.balance = 5000;
 const hands = []
 const rules = {
   minBet: 5,
@@ -130,22 +130,44 @@ for (const k of sessionSummary.dist.keys()) {
 }
 
 console.log('\nDice Roll Distribution')
-console.table(sessionSummary.dist)
+console.log(`┌─────┬───────┬──────────┬──────┬────────┐`);
+console.log(`│ Key │ Count │ Expected │ Diff │ Diff % │`);
+console.log(`├─────┼───────┼──────────┼──────┼────────┤`);
+for (const [key, value] of sessionSummary.dist.entries()) {
+  console.log(`│ ${key.toString().padStart(3)} | ${value.ct.toString().padStart(5)} │ ${value.ref?.toString().padStart(8)} │ ${value.diff?.toString().padStart(4)} │ ${value.diff_pct?.toString().padStart(5)}% │`);
+}
+console.log(`└─────┴───────┴──────────┴──────┴────────┘`);
 delete sessionSummary.dist
 
 console.log('\nSession Summary')
-console.table(sessionSummary)
-
+console.log(`┌───────────────────┬──────────┐`);
+console.log(`│ Key               │ Values   │`);
+console.log(`├───────────────────┼──────────┤`);
+console.log(`│ Balance:          │ $${sessionSummary.balance.toString().padStart(7)} │`)
+console.log(`│ Roll Count:       │ ${sessionSummary.rollCount.toString().padStart(8)} │`)
+console.log(`│ Points Set:       │ ${sessionSummary.pointsSet.toString().padStart(8)} │`)
+console.log(`│ Points Won:       │ ${sessionSummary.pointsWon.toString().padStart(8)} │`)
+console.log(`│ Come Out Wins:    │ ${sessionSummary.comeOutWins.toString().padStart(8)} │`)
+console.log(`│ Come Out Losses:  │ ${sessionSummary.comeOutLosses.toString().padStart(8)} │`)
+console.log(`│ Net Come Out Wins:│ ${sessionSummary.netComeOutWins.toString().padStart(8)} │`)
+console.log(`│ Neutrals:         │ ${sessionSummary.neutrals.toString().padStart(8)} │`)
+console.log(`│ Hand Count:       │ ${sessionSummary.handCount.toString().padStart(8)} │`)
+console.log(`└───────────────────┴──────────┘`);
 console.log('\nHands Summary')
-console.table(hands.map(hand => {
+
+hands.forEach((hand, index) => {
   delete hand.summary.dist
-  return hand.summary
-}))
+  console.log(`\nHand ${index + 1}:`)
+  console.log(`  Balance: $${hand.summary.balance}`)
+  console.log(`  Roll Count: ${hand.summary.rollCount}`)
+  console.log(`  Points Set: ${hand.summary.pointsSet}`)
+  console.log(`  Points Won: ${hand.summary.pointsWon}`)
+  console.log(`  Come Out Wins: ${hand.summary.comeOutWins}`)
+  console.log(`  Come Out Losses: ${hand.summary.comeOutLosses}`)
+  console.log(`  Net Come Out Wins: ${hand.summary.netComeOutWins}`)
+  console.log(`  Neutrals: ${hand.summary.neutrals}`)
+})
 
 if (showDetail) {
-  console.log('\nHands')
-  hands.forEach((hand, handNum) => {
-    console.log(`\nHand: ${handNum + 1}, Balance: $${hand.balance}`)
-    console.table(hand.history)
-  })
+  console.table(hands.map(hand => hand.history))
 }

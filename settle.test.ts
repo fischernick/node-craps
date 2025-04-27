@@ -1,7 +1,7 @@
 import { test } from 'tap'
 import { BetDictionary } from './bets'
-import { BetPoint, DieResult, HandResult, Point, Result, Rules } from './consts'
-import { passLine, passOdds } from './settle'
+import { BetPoint, DiceResult, DieResult, HandResult, Point, Result, Rules } from './consts'
+import { dontComeBets, passLine, passOdds } from './settle'
 
 const defaultRules: Rules = {
   minBet: 5,
@@ -52,6 +52,8 @@ const passLineWithOddsBet8: BetDictionary = new BetDictionary()
 passLineWithOddsBet8.addBet(BetPoint.Pass, 5)
 passLineWithOddsBet8.addBet(BetPoint.PassOdds, 25)
 passLineWithOddsBet8.setContract([BetPoint.Pass], true)
+
+
 
 
 test('passLine: comeout win', function (t) {
@@ -238,3 +240,209 @@ test('passOdds (8): odds bet, win', function (t) {
   t.notOk(result.bets.getBet(BetPoint.PassOdds), 'pass odds bet is cleared')
   t.end()
 }) 
+
+test('dontCome', function (t) {
+  t.test('comeout loss, Craps 2', function (t) {
+    const hand: Result = {
+      result: HandResult.COMEOUT_LOSS,
+      diceSum: DiceResult.TWO,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.OFF
+    }
+
+    const dontComeBet: BetDictionary = new BetDictionary()
+    dontComeBet.addBet(BetPoint.DontCome, 5)
+
+    const result = dontComeBets(dontComeBet, hand, defaultRules)
+    t.equal(result.payout?.type, 'dont come win')
+    t.equal(result.payout?.principal, 5)
+    t.equal(result.payout?.profit, 5)
+    t.notOk(result.bets.getBet(BetPoint.DontCome), 'dont come bet is cleared')
+    t.end()
+  })
+
+  t.test('comeout loss, Craps 3', function (t) {
+    const hand: Result = {
+      result: HandResult.COMEOUT_LOSS,
+      diceSum: DiceResult.THREE,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.OFF
+    }
+
+    const dontComeBet: BetDictionary = new BetDictionary()
+    dontComeBet.addBet(BetPoint.DontCome, 5)
+
+    const result = dontComeBets(dontComeBet, hand, defaultRules)
+    t.equal(result.payout?.type, 'dont come win')
+    t.equal(result.payout?.principal, 5)
+    t.equal(result.payout?.profit, 5)
+    t.notOk(result.bets.getBet(BetPoint.DontCome), 'dont come bet is cleared')
+    t.end()
+  })
+
+  t.test('comeout win, 7', function (t) {
+    const hand: Result = {
+      result: HandResult.COMEOUT_WIN,
+      diceSum: DiceResult.SEVEN,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.OFF
+    }
+
+    const dontComeBet: BetDictionary = new BetDictionary()
+    dontComeBet.addBet(BetPoint.DontCome, 5)
+
+    const result = dontComeBets(dontComeBet, hand, defaultRules)
+    t.equal(result.payout?.type, 'dont come win')
+    t.equal(result.payout?.principal, 5)
+    t.equal(result.payout?.profit, 5)
+    t.notOk(result.bets.getBet(BetPoint.DontCome), 'dont come bet is cleared')
+    t.end()
+  })
+
+  t.test('comeout loss, Yo 11', function (t) {
+    const hand: Result = {
+      result: HandResult.COMEOUT_LOSS,
+      diceSum: DiceResult.ELEVEN,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.OFF
+    }
+    const dontComeBet: BetDictionary = new BetDictionary()
+    dontComeBet.addBet(BetPoint.DontCome, 5)
+    const result = dontComeBets(dontComeBet, hand, defaultRules)
+    t.equal(result.payout?.type, 'dont come win')
+    t.equal(result.payout?.principal, 5)
+    t.equal(result.payout?.profit, 5)
+    t.notOk(result.bets.getBet(BetPoint.DontCome), 'dont come bet is cleared')
+    t.end()
+  })
+
+  t.test('comeout loss, Push 12', function (t) {
+    const hand: Result = {
+      result: HandResult.COMEOUT_LOSS,
+      diceSum: DiceResult.TWELVE,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.OFF
+    }
+    const dontComeBet: BetDictionary = new BetDictionary()
+    dontComeBet.addBet(BetPoint.DontCome, 5)
+    const result = dontComeBets(dontComeBet, hand, defaultRules)
+    t.notOk(result.payout)
+    t.ok(result.bets.getBet(BetPoint.DontCome), 'dont come bet is not cleared')
+    t.end()
+  })
+
+  t.test('dont come to point 4', function (t) {
+    const hand: Result = {
+      result: HandResult.NEUTRAL,
+      diceSum: DiceResult.FOUR,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.FIVE,
+    }
+    const dontComeBet: BetDictionary = new BetDictionary()
+    dontComeBet.addBet(BetPoint.DontCome, 5)
+    const result = dontComeBets(dontComeBet, hand, defaultRules)
+
+    t.notOk(result.payout)
+    t.notOk(result.bets.getBet(BetPoint.DontCome), 'dont come bet is cleared')
+    t.equal(result.bets.getBet(BetPoint.DontComePoint4)?.amount, 5)
+    t.end()
+  })
+
+  t.test('dont come to point 5', function (t) {
+    const hand: Result = {
+      result: HandResult.NEUTRAL,
+      diceSum: DiceResult.FIVE,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.SIX,
+    }
+    const dontComeBet: BetDictionary = new BetDictionary()
+    dontComeBet.addBet(BetPoint.DontCome, 5)
+    const result = dontComeBets(dontComeBet, hand, defaultRules)
+
+    t.notOk(result.payout)
+    t.notOk(result.bets.getBet(BetPoint.DontCome), 'dont come bet is cleared')
+    t.equal(result.bets.getBet(BetPoint.DontComePoint5)?.amount, 5)
+    t.end()
+  })
+
+  t.test('dont come to point 6', function (t) {
+    const hand: Result = {
+      result: HandResult.NEUTRAL,
+      diceSum: DiceResult.SIX,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.EIGHT,
+    }
+    const dontComeBet: BetDictionary = new BetDictionary()
+    dontComeBet.addBet(BetPoint.DontCome, 5)
+    const result = dontComeBets(dontComeBet, hand, defaultRules)
+
+    t.notOk(result.payout)
+    t.notOk(result.bets.getBet(BetPoint.DontCome), 'dont come bet is cleared')
+    t.equal(result.bets.getBet(BetPoint.DontComePoint6)?.amount, 5)
+    t.end()
+  })
+
+  t.test('dont come to point 8', function (t) {
+    const hand: Result = {
+      result: HandResult.NEUTRAL,
+      diceSum: DiceResult.EIGHT,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.NINE,
+    }
+    const dontComeBet: BetDictionary = new BetDictionary()
+    dontComeBet.addBet(BetPoint.DontCome, 5)
+    const result = dontComeBets(dontComeBet, hand, defaultRules)
+
+    t.notOk(result.payout)
+    t.notOk(result.bets.getBet(BetPoint.DontCome), 'dont come bet is cleared')
+    t.equal(result.bets.getBet(BetPoint.DontComePoint8)?.amount, 5)
+    t.end()
+  })
+
+  t.test('dont come to point 9', function (t) {
+    const hand: Result = {
+      result: HandResult.NEUTRAL,
+      diceSum: DiceResult.NINE,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.TEN,
+    }
+    const dontComeBet: BetDictionary = new BetDictionary()
+    dontComeBet.addBet(BetPoint.DontCome, 5)
+    const result = dontComeBets(dontComeBet, hand, defaultRules)
+
+    t.notOk(result.payout)
+    t.notOk(result.bets.getBet(BetPoint.DontCome), 'dont come bet is cleared')
+    t.equal(result.bets.getBet(BetPoint.DontComePoint9)?.amount, 5)
+    t.end()
+  })
+
+  t.test('dont come to point 10', function (t) {
+    const hand: Result = {
+      result: HandResult.NEUTRAL,
+      diceSum: DiceResult.TEN,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.FOUR,
+    }
+    const dontComeBet: BetDictionary = new BetDictionary()
+    dontComeBet.addBet(BetPoint.DontCome, 5)
+    const result = dontComeBets(dontComeBet, hand, defaultRules)
+
+    t.notOk(result.payout)
+    t.notOk(result.bets.getBet(BetPoint.DontCome), 'dont come bet is cleared')
+    t.equal(result.bets.getBet(BetPoint.DontComePoint10)?.amount, 5)
+    t.end()
+  })
+
+  t.end()
+})

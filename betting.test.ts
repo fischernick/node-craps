@@ -4,7 +4,7 @@ import {
   BetPoint, Rules
 } from './consts'
 import { BetDictionary } from './bets'
-import { minPassLineOnly, minPassLineMaxOdds } from './betting'
+import { minPassLineOnly, minPassLineMaxOdds, dontComeWithPlaceBets } from './betting'
 
 const defaultRules: Rules = {
   minBet: 5,
@@ -162,3 +162,24 @@ test('minPassLineMaxOdds: continue existing bet', (t) => {
 
   t.end()
 }) 
+
+test('dontComeWithPlaceBets: dont come bet', (t) => {
+  const hand: Result = {
+    isComeOut: false,
+    die1: DieResult.UNDEF,
+    die2: DieResult.UNDEF,
+    diceSum: DiceResult.UNDEF,
+    point: Point.EIGHT
+  }
+
+  const bets: BetDictionary = new BetDictionary()
+
+  const actual: BetDictionary = dontComeWithPlaceBets({ rules: defaultRules, bets, hand })
+  t.equal(actual.getBet(BetPoint.DontCome)?.amount, 60)
+  t.equal(actual.getBet(BetPoint.Place5)?.amount, 15)
+  t.equal(actual.getBet(BetPoint.Place6)?.amount, 18)
+  t.equal(actual.getBet(BetPoint.Place8)?.amount, 18)
+  t.equal(actual.getBet(BetPoint.Place9)?.amount, 15)
+
+  t.end()
+})

@@ -44,6 +44,23 @@ export function minPassLineMaxOdds (opts: HandOptions): BetDictionary {
   return bets
 }
 
+export function dontComeWithPlaceBets(opts: HandOptions): BetDictionary {
+  // 15 5&9
+  // 18 6&8
+  // dc 60
+  const { rules, hand, bets } = opts
+  if (!hand.isComeOut) {
+    let theseBets = bets ?? new BetDictionary()
+    theseBets.addBet(BetPoint.DontCome, 60)
+    theseBets.addBet(BetPoint.Place5, 15)
+    theseBets.addBet(BetPoint.Place6, 18)
+    theseBets.addBet(BetPoint.Place8, 18)
+    theseBets.addBet(BetPoint.Place9, 15)
+    return theseBets
+  }
+  return bets ? bets : new BetDictionary()
+}
+
 exports = {
   minPassLineOnly,
   minPassLineMaxOdds

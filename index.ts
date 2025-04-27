@@ -79,12 +79,13 @@ export function playHand ( rules: any, bettingStrategy: BettingStrategy, roll = 
     bets.newBetSum = 0
 
 
-    displayTable(bets, hand.point, balance);
 
     hand = shoot(
       hand,
       [roll(), roll()]
     )
+
+    displayTable(bets, hand.point, balance, hand);
 
     if (process.env.DEBUG) console.log(`[roll] ${hand.result} (${hand.diceSum})`)
 
@@ -118,7 +119,7 @@ export function buildHeaderLine(point: Point): string {
   return headerLine;
 }
 
-function displayTable(bets: BetDictionary, point: Point, balance: number): void {
+function displayTable(bets: BetDictionary, point: Point, balance: number, result?: Result): void {
   const pf = (value: BetPoint): string => {
     if (value === undefined) {
       return "     ";
@@ -140,8 +141,10 @@ function displayTable(bets: BetDictionary, point: Point, balance: number): void 
   table += `│ ┇ Dont Pass:         ║     PASS LINE: ${pf(BetPoint.Pass)}      │\n`;
   table += `│ ┇   DP Odds:         ║       PL Odds: ${pf(BetPoint.PassOdds)}      │\n`;
   table += `╘═╧════════════════════╩═══════════════════════════╛\n`;
+  if (result) {
+    table += `╱ ╱ handResult: ${result.die1} ${result.die2} ${result.diceSum} ${result.point} ${result.result}                 \n`;
+  }
   table += `╲ ╲ Balance: ${balance.toString().padStart(4, ' ')}  \n`;
-  table += `                                                    \n`;
   console.log(table);
 }
 

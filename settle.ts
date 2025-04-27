@@ -46,6 +46,66 @@ export function passOdds(bets: BetDictionary, hand: Result, rules: Rules) {
   return { payout, bets }
 }
 
+export function dontComeBets(bets: BetDictionary, hand: Result, rules: Rules): { bets: BetDictionary, payout?: Payout } {
+
+  if (bets.getBet(BetPoint.DontCome) === undefined) {
+    console.log('no dont come bet')
+    return { bets }
+  }
+
+  const dontComeBet = bets.getBet(BetPoint.DontCome)
+
+  // diceSum of 12 is a push on the dont come bet
+  if (hand.diceSum === DiceResult.TWELVE) {
+    console.log('PUSH')
+    return { bets }
+  }
+
+  // Create copy of input bets
+  const rbets = bets.copy()
+
+  if ([DiceResult.SEVEN, DiceResult.ELEVEN, DiceResult.TWO, DiceResult.THREE].includes(hand.diceSum)) {
+
+    const payout = {
+      type: 'dont come win',
+      principal: dontComeBet?.amount ?? 0,
+      profit: (dontComeBet?.amount ?? 0) * getPayout(BetPoint.DontCome, hand.diceSum)
+    }
+    rbets.clearBet(BetPoint.DontCome)
+    return { bets: rbets, payout }
+  }
+
+  let dontComePointBet = undefined
+  switch (hand.diceSum) {
+    case DiceResult.FOUR:
+      dontComePointBet = BetPoint.DontComePoint4
+      break
+    case DiceResult.FIVE:
+      dontComePointBet = BetPoint.DontComePoint5
+      break
+    case DiceResult.SIX:
+      dontComePointBet = BetPoint.DontComePoint6
+      break
+    case DiceResult.EIGHT:
+      dontComePointBet = BetPoint.DontComePoint8
+      break
+    case DiceResult.NINE:
+      dontComePointBet = BetPoint.DontComePoint9
+      break
+    case DiceResult.TEN:
+      dontComePointBet = BetPoint.DontComePoint10
+      break
+  }
+
+  if (!dontComePointBet) {
+    throw new Error(`no dont come point bet for dice sum ${hand.diceSum}`)
+  }
+
+  rbets.addBet(dontComePointBet, dontComeBet?.amount ?? 0)
+  rbets.clearBet(BetPoint.DontCome)
+  return { bets: rbets }
+}
+
 export function getPayout(betPoint: BetPoint, diceSum: DiceResult) {
   const payouts = BetPointPayouts[betPoint]
   if (!payouts || !payouts[diceSum]) {
@@ -78,6 +138,11 @@ export function settleAllBets ( bets: BetDictionary, hand: Result, rules:any ) :
   bets = passOddsResult.bets
   payouts.push(passOddsResult.payout)
 
+  const dontComeResult = dontComeBets(bets, hand, rules)
+
+  bets = dontComeResult.bets
+  payouts.push(dontComeResult.payout)
+
   bets.payoutSum = payouts.reduce((memo: Memo, payout) => {
     if (!payout) return memo
 
@@ -107,5 +172,6 @@ export function settleAllBets ( bets: BetDictionary, hand: Result, rules:any ) :
 module.exports = {
   passLine,
   passOdds,
-  settleAllBets
+  settleAllBets,
+  dontComeBets
 }
