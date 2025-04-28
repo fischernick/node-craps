@@ -483,5 +483,26 @@ test('dontCome', function (t) {
     t.equal(result.bets.getBet(BetPoint.DontComePoint6)?.amount, 5)
     t.end()
   })
+
+
+  t.test('dont come on 4, point on 10, 7 out', function (t) {
+    const hand: Result = {
+      result: HandResult.SEVEN_OUT,
+      diceSum: DiceResult.SEVEN,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.TEN
+    }
+    const dontComeBet: BetDictionary = new BetDictionary()
+    dontComeBet.addBet(BetPoint.DontComePoint4, 5)
+    const result = dontComeBets(dontComeBet, hand, defaultRules)
+    t.ok(result.payout)
+    t.equal(result.payout?.type, 'dont come win')
+    t.equal(result.payout?.principal, 5)
+    t.equal(result.payout?.profit, 5)
+    t.notOk(result.bets.getBet(BetPoint.DontComePoint4))
+    t.end()
+  })
+
   t.end()
 })

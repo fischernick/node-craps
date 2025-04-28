@@ -1,5 +1,6 @@
 import { BetPoint, BetPointPayouts, DiceResult, HandResult, Memo, Rules, type Result, type Payout, diceResultAsPoint, Point, DontComePointBets } from './consts.js'
 import { BetDictionary } from './bets.js'
+import chalk from 'chalk'
 
 export function passLine(bets: BetDictionary, hand: Result, rules: Rules): { bets: BetDictionary, payout?: Payout } {
   if (bets.getBet(BetPoint.Pass) === undefined) return { bets }
@@ -156,8 +157,8 @@ export function dontComeBets(bets: BetDictionary, hand: Result, rules: Rules): {
       throw new Error(`no dont come point bet for dice sum ${hand.diceSum}`)
     }
 
-    // add that dont come bet to the numbered dont come bet
-    rbets.addBet(dontComePointBet, dontComeBet?.amount ?? 0)
+    // move that dont come bet to the numbered dont come bet point
+    rbets.moveDCBet(dontComePointBet)
   }
 
   // clear the dont come bet
@@ -187,6 +188,11 @@ export function settleAllBets ( bets: BetDictionary, hand: Result, rules:any ) :
     bets.setContract([BetPoint.Pass, BetPoint.DontPass], false)
   }
 
+  const dontComeResult = dontComeBets(bets, hand, rules)
+
+  bets = dontComeResult.bets
+  payouts.push(dontComeResult.payout)
+
   const passLineResult = passLine( bets, hand, rules )
 
   bets = passLineResult.bets
@@ -196,13 +202,6 @@ export function settleAllBets ( bets: BetDictionary, hand: Result, rules:any ) :
 
   bets = passOddsResult.bets
   payouts.push(passOddsResult.payout)
-
-  const dontComeResult = dontComeBets(bets, hand, rules)
-
-  bets = dontComeResult.bets
-  payouts.push(dontComeResult.payout)
-
-  if (process.env.DEBUG) console.log('dcpayouts:: ', JSON.stringify(dontComeResult.payout))
 
   bets.payoutSum = payouts.reduce((memo: Memo, payout) => {
     if (!payout) return memo

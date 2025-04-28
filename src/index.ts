@@ -95,7 +95,6 @@ export function playHand(rules: any, bettingStrategy: BettingStrategy, roll = ro
 
     if (bets?.payoutSum) {
       balance += bets.payoutSum.total
-      if (process.env.DEBUG) console.log(`[payout] new payout $${bets.payoutSum} ($${balance})`)
       delete bets.payoutSum
     }
 
@@ -158,7 +157,7 @@ function displayTable(preRoll: boolean, bets: BetDictionary, point: Point, balan
 
 
   let table = '';
-  table += (preRoll ? '    PLACE BETS  BEFORE ROLL ' : '    ROLL RESULTS AFTER BETS SETTLED') + '\n';
+  table += (preRoll ? '    EXISTING BETS  BEFORE ROLL ' : '    ROLL RESULTS AND BETS SETTLED') + '\n';
   table += `┏━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┓\n`;
   table += buildHeaderLine(point) + '\n';
   table += `┃DC┃${dcbets(bets)}\n`;

@@ -37,10 +37,9 @@ export class BetDictionary {
         const copy = new BetDictionary()
         copy.newBetSum = this.newBetSum
         copy.payoutSum = this.payoutSum
-        Object.values(BetPoint).forEach(value => {
-            if (typeof value === 'number') {
-                copy.addBet(value, this[value].amount)
-                copy[value].isContract = this[value].isContract
+        Object.values(BetPoint).forEach(betPoint => {
+            if (typeof betPoint === 'number') {
+                copy[betPoint] = { amount: this[betPoint].amount, isContract: this[betPoint].isContract, set: this[betPoint].set };
             }
         })
         return copy
@@ -57,6 +56,20 @@ export class BetDictionary {
         }
         this[betPoint] = { amount, isContract: false, set: true };
         this.newBetSum += amount;
+    }
+
+    /**
+     * Add a bet to the dictionary
+     * @param betPoint The type of bet
+     * @param amount The amount of the bet
+     */
+    moveDCBet(betPoint: BetPoint): void {
+        const bp = this[BetPoint.DontCome];
+        if (bp.amount === 0) {
+            return;
+        }
+        this[betPoint] = { amount: bp.amount, isContract: true, set: true };
+        this[BetPoint.DontCome] = { amount: 0, isContract: false, set: false };
     }
 
     /**
@@ -105,6 +118,16 @@ export class BetDictionary {
         });
     }
 
+    toString(): string {
+        let str = 'Bets::\n'
+        Object.values(BetPoint).forEach(value => {
+            if (typeof value === 'number' && this[value].set) {
+                str += ` ${BetPoint[value].toString()}: amt: ${this[value].amount}, ctrt: ${this[value].isContract}, set: ${this[value].set} \n`
+            }
+        })
+        str += `newBetSum: ${this.newBetSum}, payoutSum: ${this.payoutSum}\n`
+        return str
+    }
 
 }
 
