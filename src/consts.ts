@@ -96,6 +96,27 @@ enum BetPoint {
 }
 
 const DontComePointBets = [BetPoint.DontComePoint4, BetPoint.DontComePoint5, BetPoint.DontComePoint6, BetPoint.DontComePoint8, BetPoint.DontComePoint9, BetPoint.DontComePoint10]
+const PlaceBets = [BetPoint.Place4, BetPoint.Place5, BetPoint.Place6, BetPoint.Place8, BetPoint.Place9, BetPoint.Place10]
+
+// define function to get place bet point from dice sum
+export function getPlaceBetPoint(diceSum: DiceResult): BetPoint | undefined {
+    switch (diceSum) {
+        case DiceResult.FOUR:
+            return BetPoint.Place4;
+        case DiceResult.FIVE:
+            return BetPoint.Place5;
+        case DiceResult.SIX:
+            return BetPoint.Place6;
+        case DiceResult.EIGHT:
+            return BetPoint.Place8;
+        case DiceResult.NINE:
+            return BetPoint.Place9;
+        case DiceResult.TEN:
+            return BetPoint.Place10;
+        default:
+            return undefined;
+    }
+}
 
 /**
  * Represents a payout for a bet
@@ -148,6 +169,15 @@ const dontComeOddsPayouts: PayoutMap = {
     [DiceResult.TEN]: 2,
 }
 
+const placePayouts: PayoutMap = {
+    [DiceResult.FOUR]: 9 / 5,
+    [DiceResult.FIVE]: 7 / 5,
+    [DiceResult.SIX]: 7 / 6,
+    [DiceResult.EIGHT]: 7 / 6,
+    [DiceResult.NINE]: 7 / 5,
+    [DiceResult.TEN]: 9 / 5,
+}
+
 const BetPointPayouts: Partial<Record<BetPoint, PayoutMap>> = {
     [BetPoint.Pass]: passPayouts,
     [BetPoint.PassOdds]: passOddsPayouts,
@@ -157,6 +187,12 @@ const BetPointPayouts: Partial<Record<BetPoint, PayoutMap>> = {
     //[BetPoint.DontPassOdds]: passOddsPayouts,
     [BetPoint.DontCome]: dontComePayouts,
     [BetPoint.DontComeOdds]: dontComeOddsPayouts,
+    [BetPoint.Place4]: placePayouts,
+    [BetPoint.Place5]: placePayouts,
+    [BetPoint.Place6]: placePayouts,
+    [BetPoint.Place8]: placePayouts,
+    [BetPoint.Place9]: placePayouts,
+    [BetPoint.Place10]: placePayouts,
 };
 
 interface Rules {
@@ -205,5 +241,6 @@ export {
     DieResult,
     distObj,
     Rules,
-    DontComePointBets
+    DontComePointBets,
+    PlaceBets
 }

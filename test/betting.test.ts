@@ -176,11 +176,11 @@ test('dontComeWithPlaceBets: dont come bet', (t) => {
 
   const actual: BetDictionary = dontComeWithPlaceBets({ rules: defaultRules, bets, hand })
   t.equal(actual.getBet(BetPoint.DontCome)?.amount, 60)
-  // havent implemented place bets yet
-  // t.equal(actual.getBet(BetPoint.Place5)?.amount, 15)
+  t.equal(actual.getBet(BetPoint.Place5)?.amount, 15)
   // t.equal(actual.getBet(BetPoint.Place6)?.amount, 18)
   // t.equal(actual.getBet(BetPoint.Place8)?.amount, 18)
   // t.equal(actual.getBet(BetPoint.Place9)?.amount, 15)
 
   t.end()
 })
+

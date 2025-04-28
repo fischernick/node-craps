@@ -118,6 +118,7 @@ export function buildHeaderLine(point: Point): string {
 
   return headerLine;
 }
+
 export function dcbets(bets: BetDictionary): string {
   let tots = "";
   //const pointValues = [Point.FOUR, Point.FIVE, Point.SIX, Point.EIGHT, Point.NINE, Point.TEN];
@@ -142,6 +143,30 @@ export function dcbets(bets: BetDictionary): string {
   return tots;
 }
 
+export function pbets(bets: BetDictionary): string {
+  let tots = `      ┃`;
+  //const pointValues = [Point.FOUR, Point.FIVE, Point.SIX, Point.EIGHT, Point.NINE, Point.TEN];
+  const dcPoints = [
+    BetPoint.Place4,
+    BetPoint.Place5,
+    BetPoint.Place6,
+    BetPoint.Place8,
+    BetPoint.Place9,
+    BetPoint.Place10
+  ];
+  dcPoints.forEach((p, i) => {
+    const bet = bets.getBet(p);
+    if (bet) {
+      tots += ` ${chalk.green(bet.amount.toString().padStart(4, ' '))} ┃`;
+    } else {
+      tots += `      ┃`;
+    }
+
+  });
+  return tots;
+}
+
+
 function displayTable(preRoll: boolean, bets: BetDictionary, point: Point, balance: number, result?: Result): void {
   const pf = (value: BetPoint): string => {
     if (value === undefined) {
@@ -162,7 +187,7 @@ function displayTable(preRoll: boolean, bets: BetDictionary, point: Point, balan
   table += buildHeaderLine(point) + '\n';
   table += `┃DC┃${dcbets(bets)}\n`;
   table += `┃dO┃  n/a ┃      ┃      ┃      ┃      ┃      ┃      ┃\n`;
-  table += `┃PB┃      ┃      ┃      ┃      ┃      ┃      ┃      ┃\n`;
+  table += `┃PB┃${pbets(bets)}\n`;
   table += `┃ O┃      ┃      ┃      ┃      ┃      ┃      ┃      ┃\n`;
   table += `┡━━╇━━━━━━┻━━━━━━┻━━━━━━╬━━━━━━┻━━━━━━┻━━━━━━┻━━━━━━┩\n`;
   table += `│  ┇     Field:         ║      COME:                │\n`;
@@ -174,6 +199,10 @@ function displayTable(preRoll: boolean, bets: BetDictionary, point: Point, balan
   } else {
     table += `╱ ╱ PREROLL \n`;
   }
-  table += `╲ ╲ Balance: ${balance.toString().padStart(4, ' ')}  \n`;
+  if (preRoll) {
+    table += `╲ ╲ Balance: ${balance.toString().padStart(4, ' ')}\n`;
+  } else {
+    table += `╲ ╲ Balance: ${balance.toString().padStart(4, ' ')} + ${bets.payoutSum?.total} = ${balance + (bets.payoutSum?.total ?? 0)}\n`;
+  }
   console.log(table);
 }

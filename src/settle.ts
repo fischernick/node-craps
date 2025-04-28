@@ -1,8 +1,16 @@
-import { BetPoint, BetPointPayouts, DiceResult, HandResult, Memo, Rules, type Result, type Payout, diceResultAsPoint, Point, DontComePointBets } from './consts.js'
+import {
+  BetPoint, BetPointPayouts, DiceResult, HandResult, Memo, Rules, type Result, type Payout, diceResultAsPoint, Point,
+  DontComePointBets, PlaceBets,
+  getPlaceBetPoint
+} from './consts.js'
 import { BetDictionary } from './bets.js'
-import chalk from 'chalk'
 
-export function passLine(bets: BetDictionary, hand: Result, rules: Rules): { bets: BetDictionary, payout?: Payout } {
+export type Settlement = {
+  bets: BetDictionary;
+  payout?: Payout;
+}
+
+export function passLine(bets: BetDictionary, hand: Result, rules: Rules): Settlement {
   if (bets.getBet(BetPoint.Pass) === undefined) return { bets }
 
   const payoutActionResults = [HandResult.SEVEN_OUT, HandResult.POINT_WIN, HandResult.COMEOUT_WIN, HandResult.COMEOUT_LOSS]
@@ -66,7 +74,43 @@ function getDontComePointBet(diceSum: DiceResult): BetPoint | undefined {
   return undefined
 }
 
-export function dontComeBets(bets: BetDictionary, hand: Result, rules: Rules): { bets: BetDictionary, payout?: Payout } {
+export function placeBets(bets: BetDictionary, hand: Result, rules: Rules): Settlement {
+
+  //const placeBets = PlaceBets.map(bet => bets.getBet(bet))
+  if (PlaceBets.every(betPoint => bets.getBet(betPoint) === undefined)) {
+    return { bets }
+  }
+
+  // if the dice sum is 7, clear all place bets
+  if (hand.diceSum === DiceResult.SEVEN) {
+    for (const bet of PlaceBets) {
+      if (bets.getBet(bet)) {
+        bets.clearBet(bet)
+      }
+    }
+  }
+
+  // if the dice sum has a matching place bet, pay it out and clear it
+  const matchingPlaceBet = getPlaceBetPoint(hand.diceSum)
+  if (!matchingPlaceBet) {
+    return { bets }
+  }
+  const winningPlaceBet = bets.getBet(matchingPlaceBet)
+  if (!winningPlaceBet) {
+    return { bets }
+  }
+  const payout = {
+    type: 'place win',
+    principal: winningPlaceBet.amount,
+    profit: winningPlaceBet.amount * (getPayout(matchingPlaceBet, hand.diceSum) ?? 0)
+  }
+  if (process.env.DEBUG) console.log(`clearing winning place bet ${BetPoint[matchingPlaceBet]}`)
+  bets.clearBet(matchingPlaceBet)
+
+  return { bets, payout }
+}
+
+export function dontComeBets(bets: BetDictionary, hand: Result, rules: Rules): Settlement {
 
   const dontComeBet = bets.getBet(BetPoint.DontCome)
   // diceSum of 12 is a push on the dont come bet
@@ -188,20 +232,27 @@ export function settleAllBets ( bets: BetDictionary, hand: Result, rules:any ) :
     bets.setContract([BetPoint.Pass, BetPoint.DontPass], false)
   }
 
-  const dontComeResult = dontComeBets(bets, hand, rules)
+  const allTheBets = [placeBets, dontComeBets, passLine, passOdds]
+  for (const bet of allTheBets) {
+    const result = bet(bets, hand, rules)
+    bets = result.bets
+    payouts.push(result.payout)
+  }
 
-  bets = dontComeResult.bets
-  payouts.push(dontComeResult.payout)
+  // const dontComeResult = dontComeBets(bets, hand, rules)
 
-  const passLineResult = passLine( bets, hand, rules )
+  // bets = dontComeResult.bets
+  // payouts.push(dontComeResult.payout)
 
-  bets = passLineResult.bets
-  payouts.push(passLineResult.payout)
+  // const passLineResult = passLine( bets, hand, rules )
 
-  const passOddsResult = passOdds( bets, hand, rules )
+  // bets = passLineResult.bets
+  // payouts.push(passLineResult.payout)
 
-  bets = passOddsResult.bets
-  payouts.push(passOddsResult.payout)
+  // const passOddsResult = passOdds( bets, hand, rules )
+
+  // bets = passOddsResult.bets
+  // payouts.push(passOddsResult.payout)
 
   bets.payoutSum = payouts.reduce((memo: Memo, payout) => {
     if (!payout) return memo

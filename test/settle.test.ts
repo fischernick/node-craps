@@ -1,7 +1,7 @@
 import { test } from 'tap'
 import { BetDictionary } from '../src/bets.js'
 import { BetPoint, DiceResult, DieResult, HandResult, Point, Result, Rules } from '../src/consts.js'
-import { dontComeBets, passLine, passOdds, settleAllBets } from '../src/settle.js'
+import { dontComeBets, passLine, passOdds, placeBets } from '../src/settle.js'
 
 const defaultRules: Rules = {
   minBet: 5,
@@ -501,6 +501,124 @@ test('dontCome', function (t) {
     t.equal(result.payout?.principal, 5)
     t.equal(result.payout?.profit, 5)
     t.notOk(result.bets.getBet(BetPoint.DontComePoint4))
+    t.end()
+  })
+
+  t.end()
+})
+
+test('place', function (t) {
+  t.test('place win 4', function (t) {
+    const hand: Result = {
+      result: HandResult.NEUTRAL,
+      diceSum: DiceResult.FOUR,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.FIVE
+    }
+
+    const placeBet: BetDictionary = new BetDictionary()
+    placeBet.addBet(BetPoint.Place4, 5)
+    const result = placeBets(placeBet, hand, defaultRules)
+    t.equal(result.payout?.type, 'place win')
+    t.equal(result.payout?.principal, 5)
+    t.equal(result.payout?.profit, 9)
+    t.notOk(result.bets.getBet(BetPoint.Place4))
+    t.end()
+  })
+
+  t.test('place win 5', function (t) {
+    const hand: Result = {
+      result: HandResult.NEUTRAL,
+      diceSum: DiceResult.FIVE,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.FOUR
+    }
+
+    const placeBet: BetDictionary = new BetDictionary()
+    placeBet.addBet(BetPoint.Place5, 5)
+    const result = placeBets(placeBet, hand, defaultRules)
+    t.equal(result.payout?.type, 'place win')
+    t.equal(result.payout?.principal, 5)
+    t.equal(result.payout?.profit, 7)
+    t.notOk(result.bets.getBet(BetPoint.Place5))
+    t.end()
+  })
+
+  t.test('place win 6', function (t) {
+    const hand: Result = {
+      result: HandResult.NEUTRAL,
+      diceSum: DiceResult.SIX,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.FIVE
+    }
+
+    const placeBet: BetDictionary = new BetDictionary()
+    placeBet.addBet(BetPoint.Place6, 18)
+    const result = placeBets(placeBet, hand, defaultRules)
+    t.equal(result.payout?.type, 'place win')
+    t.equal(result.payout?.principal, 18)
+    t.equal(result.payout?.profit, 21)
+    t.notOk(result.bets.getBet(BetPoint.Place6))
+    t.end()
+  })
+
+  t.test('place win 8', function (t) {
+    const hand: Result = {
+      result: HandResult.NEUTRAL,
+      diceSum: DiceResult.EIGHT,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.FIVE
+    }
+
+    const placeBet: BetDictionary = new BetDictionary()
+    placeBet.addBet(BetPoint.Place8, 18)
+    const result = placeBets(placeBet, hand, defaultRules)
+    t.equal(result.payout?.type, 'place win')
+    t.equal(result.payout?.principal, 18)
+    t.equal(result.payout?.profit, 21)
+    t.notOk(result.bets.getBet(BetPoint.Place8))
+    t.end()
+  })
+
+  t.test('place win 9', function (t) {
+    const hand: Result = {
+      result: HandResult.NEUTRAL,
+      diceSum: DiceResult.NINE,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.FIVE
+    }
+
+    const placeBet: BetDictionary = new BetDictionary()
+    placeBet.addBet(BetPoint.Place9, 5)
+    const result = placeBets(placeBet, hand, defaultRules)
+    t.equal(result.payout?.type, 'place win')
+    t.equal(result.payout?.principal, 5)
+    t.equal(result.payout?.profit, 7)
+    t.notOk(result.bets.getBet(BetPoint.Place9))
+    t.end()
+  })
+
+  t.test('place win 10', function (t) {
+    const hand: Result = {
+      result: HandResult.NEUTRAL,
+      diceSum: DiceResult.TEN,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      point: Point.FIVE
+    }
+
+    const placeBet: BetDictionary = new BetDictionary()
+    placeBet.addBet(BetPoint.Place10, 5)
+    const result = placeBets(placeBet, hand, defaultRules)
+    t.equal(result.payout?.type, 'place win')
+    t.equal(result.payout?.principal, 5)
+    t.equal(result.payout?.profit, 9)
+    t.notOk(result.bets.getBet(BetPoint.Place10))
     t.end()
   })
 
