@@ -1,5 +1,5 @@
-import { type Result, BetPoint, Rules } from "./consts";
-import { BetDictionary } from "./bets";
+import { type Result, BetPoint, DontComePointBets, Rules } from "./consts.js";
+import { BetDictionary } from "./bets.js";
 
 export type HandOptions = {
   rules?: Rules; 
@@ -50,18 +50,21 @@ export function dontComeWithPlaceBets(opts: HandOptions): BetDictionary {
   // dc 60
   const { rules, hand, bets } = opts
   if (!hand.isComeOut) {
+    // check all the dont come point bets for an existing dont come bet
+    const dontComeBet = DontComePointBets.find(bet => bets?.getBet(bet))
     let theseBets = bets ?? new BetDictionary()
-    theseBets.addBet(BetPoint.DontCome, 60)
-    theseBets.addBet(BetPoint.Place5, 15)
-    theseBets.addBet(BetPoint.Place6, 18)
-    theseBets.addBet(BetPoint.Place8, 18)
-    theseBets.addBet(BetPoint.Place9, 15)
+
+    if (!dontComeBet) {
+    // no dont come bet, add one
+      theseBets.addBet(BetPoint.DontCome, 60)      
+    }
+
+    // havent implemented place bets yet
+    // theseBets.addBet(BetPoint.Place5, 15)
+    // theseBets.addBet(BetPoint.Place6, 18)
+    // theseBets.addBet(BetPoint.Place8, 18)
+    // theseBets.addBet(BetPoint.Place9, 15)
     return theseBets
   }
   return bets ? bets : new BetDictionary()
-}
-
-exports = {
-  minPassLineOnly,
-  minPassLineMaxOdds
 }

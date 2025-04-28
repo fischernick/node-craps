@@ -95,6 +95,8 @@ enum BetPoint {
     DontComePoint10 = 19,
 }
 
+const DontComePointBets = [BetPoint.DontComePoint4, BetPoint.DontComePoint5, BetPoint.DontComePoint6, BetPoint.DontComePoint8, BetPoint.DontComePoint9, BetPoint.DontComePoint10]
+
 /**
  * Represents a payout for a bet
  */
@@ -129,6 +131,21 @@ const dontComePayouts: PayoutMap = {
     [DiceResult.THREE]: 1,
     [DiceResult.SEVEN]: 1,
     [DiceResult.ELEVEN]: 1,
+    [DiceResult.FOUR]: 1,
+    [DiceResult.FIVE]: 1,
+    [DiceResult.SIX]: 1,
+    [DiceResult.EIGHT]: 1,
+    [DiceResult.NINE]: 1,
+    [DiceResult.TEN]: 1,
+}
+
+const dontComeOddsPayouts: PayoutMap = {
+    [DiceResult.FOUR]: 2,
+    [DiceResult.FIVE]: 3 / 2,
+    [DiceResult.SIX]: 6 / 5,
+    [DiceResult.EIGHT]: 6 / 5,
+    [DiceResult.NINE]: 3 / 2,
+    [DiceResult.TEN]: 2,
 }
 
 const BetPointPayouts: Partial<Record<BetPoint, PayoutMap>> = {
@@ -139,7 +156,7 @@ const BetPointPayouts: Partial<Record<BetPoint, PayoutMap>> = {
     //[BetPoint.DontPass]: passOddsPayouts,
     //[BetPoint.DontPassOdds]: passOddsPayouts,
     [BetPoint.DontCome]: dontComePayouts,
-    //[BetPoint.DontComeOdds]: passOddsPayouts, // DNE: dont come odds are once placed on a point.
+    [BetPoint.DontComeOdds]: dontComeOddsPayouts,
 };
 
 interface Rules {
@@ -188,4 +205,5 @@ export {
     DieResult,
     distObj,
     Rules,
+    DontComePointBets
 }

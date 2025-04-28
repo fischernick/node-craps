@@ -1,3 +1,4 @@
 built/
 node_modules/
 .tap/
+.nyc_output/

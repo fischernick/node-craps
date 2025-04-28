@@ -1,6 +1,6 @@
 import { beforeEach, test } from "tap";
-import { BetPoint } from "./consts";
-import { BetDictionary } from "./bets";
+import { BetPoint } from "../src/consts.js";
+import { BetDictionary } from "../src/bets.js";
 
 // Tests
 

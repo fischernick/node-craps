@@ -1,9 +1,8 @@
-import { inspect } from 'node:util'
-
-import { settleAllBets } from './settle'
-import { HandOptions, minPassLineMaxOdds, minPassLineOnly} from './betting'
-import { HandResult, type Result, Point, diceResultAsPoint, DieResult, DiceResult, BetPoint } from "./consts"
-import { BetDictionary } from "./bets"
+import chalk from 'chalk'
+import { settleAllBets } from './settle.js'
+import { HandOptions, minPassLineMaxOdds, minPassLineOnly } from './betting.js'
+import { HandResult, type Result, Point, diceResultAsPoint, DieResult, DiceResult, BetPoint } from "./consts.js"
+import { BetDictionary } from "./bets.js"
 
 export function rollD6() {
   return 1 + Math.floor(Math.random() * 6)
@@ -56,7 +55,7 @@ export function shoot(before: Result, dice: DieResult[]): Result {
 
 export type BettingStrategy = (param1: HandOptions) => BetDictionary
 
-export function playHand ( rules: any, bettingStrategy: BettingStrategy, roll = rollD6 ) : any {
+export function playHand(rules: any, bettingStrategy: BettingStrategy, roll = rollD6): any {
   const history = []
   let balance = 0
 
@@ -73,11 +72,12 @@ export function playHand ( rules: any, bettingStrategy: BettingStrategy, roll = 
 
   while (hand.result !== HandResult.SEVEN_OUT) {
     if (process.env.DEBUG) console.log(`[NEW HAND]`)
-    bets = bettingStrategy( {rules, bets, hand} )
+    bets = bettingStrategy({ rules, bets, hand })
     balance -= bets.newBetSum
     if (process.env.DEBUG && bets.newBetSum) console.log(`[bet] new bet $${bets.newBetSum} ($${balance})`)
     bets.newBetSum = 0
 
+    displayTable(true, bets, hand.point, balance, hand);
 
 
     hand = shoot(
@@ -85,12 +85,13 @@ export function playHand ( rules: any, bettingStrategy: BettingStrategy, roll = 
       [roll(), roll()]
     )
 
-    displayTable(bets, hand.point, balance, hand);
 
     if (process.env.DEBUG) console.log(`[roll] ${hand.result} (${hand.diceSum})`)
 
     //bets = settle.all({ rules, bets, hand })
-    bets = settleAllBets(  bets, hand, rules )
+    bets = settleAllBets(bets, hand, rules)
+
+    displayTable(false, bets, hand.point, balance, hand);
 
     if (bets?.payoutSum) {
       balance += bets.payoutSum.total
@@ -105,7 +106,7 @@ export function playHand ( rules: any, bettingStrategy: BettingStrategy, roll = 
 }
 
 export function buildHeaderLine(point: Point): string {
-  let headerLine = '┃ ┃';
+  let headerLine = '┃  ┃';
   const points = ['DC', '4', '5', '6', '8', '9', '10'];
   const pointValues = [Point.OFF, Point.FOUR, Point.FIVE, Point.SIX, Point.EIGHT, Point.NINE, Point.TEN];
 
@@ -113,13 +114,36 @@ export function buildHeaderLine(point: Point): string {
     const isPoint = point === pointValues[i] || (i === 0 && point === Point.UNDEF);
     // "      "
     const prePad = (p === 'DC' || p === '10') ? ' ' : '  ';
-    headerLine += isPoint ? `${prePad}*${p}  ┃` : `${prePad} ${p}  ┃`;
+    headerLine += isPoint ? `${prePad}${chalk.yellowBright("*")}${p}  ┃` : `${prePad} ${p}  ┃`;
   });
 
   return headerLine;
 }
+export function dcbets(bets: BetDictionary): string {
+  let tots = "";
+  //const pointValues = [Point.FOUR, Point.FIVE, Point.SIX, Point.EIGHT, Point.NINE, Point.TEN];
+  const dcPoints = [
+    BetPoint.DontCome,
+    BetPoint.DontComePoint4,
+    BetPoint.DontComePoint5,
+    BetPoint.DontComePoint6,
+    BetPoint.DontComePoint8,
+    BetPoint.DontComePoint9,
+    BetPoint.DontComePoint10
+  ];
+  dcPoints.forEach((p, i) => {
+    const bet = bets.getBet(p);
+    if (bet) {
+      tots += ` ${chalk.green(bet.amount.toString().padStart(4, ' '))} ┃`;
+    } else {
+      tots += `      ┃`;
+    }
 
-function displayTable(bets: BetDictionary, point: Point, balance: number, result?: Result): void {
+  });
+  return tots;
+}
+
+function displayTable(preRoll: boolean, bets: BetDictionary, point: Point, balance: number, result?: Result): void {
   const pf = (value: BetPoint): string => {
     if (value === undefined) {
       return "     ";
@@ -131,27 +155,26 @@ function displayTable(bets: BetDictionary, point: Point, balance: number, result
     return "$" + bet.amount.toString().padStart(4, ' ');
   }
 
+
+
   let table = '';
-  table += `┏━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┓\n`;
+  table += (preRoll ? '    PLACE BETS  BEFORE ROLL ' : '    ROLL RESULTS AFTER BETS SETTLED') + '\n';
+  table += `┏━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┓\n`;
   table += buildHeaderLine(point) + '\n';
-  table += `┃B┃      ┃      ┃      ┃      ┃      ┃      ┃      ┃\n`;
-  table += `┃O┃      ┃      ┃      ┃      ┃      ┃      ┃      ┃\n`;
-  table += `┡━╇━━━━━━┻━━━━━━┻━━━━━━╬━━━━━━┻━━━━━━┻━━━━━━┻━━━━━━┩\n`;
-  table += `│ ┇     Field:         ║     COME:                 │\n`;
-  table += `│ ┇ Dont Pass:         ║     PASS LINE: ${pf(BetPoint.Pass)}      │\n`;
-  table += `│ ┇   DP Odds:         ║       PL Odds: ${pf(BetPoint.PassOdds)}      │\n`;
-  table += `╘═╧════════════════════╩═══════════════════════════╛\n`;
-  if (result) {
-    table += `╱ ╱ handResult: ${result.die1} ${result.die2} ${result.diceSum} ${result.point} ${result.result}                 \n`;
+  table += `┃DC┃${dcbets(bets)}\n`;
+  table += `┃dO┃  n/a ┃      ┃      ┃      ┃      ┃      ┃      ┃\n`;
+  table += `┃PB┃      ┃      ┃      ┃      ┃      ┃      ┃      ┃\n`;
+  table += `┃ O┃      ┃      ┃      ┃      ┃      ┃      ┃      ┃\n`;
+  table += `┡━━╇━━━━━━┻━━━━━━┻━━━━━━╬━━━━━━┻━━━━━━┻━━━━━━┻━━━━━━┩\n`;
+  table += `│  ┇     Field:         ║      COME:                │\n`;
+  table += `│  ┇ Dont Pass:         ║ PASS LINE: ${pf(BetPoint.Pass)}          │\n`;
+  table += `│  ┇   DP Odds:         ║   PL Odds: ${pf(BetPoint.PassOdds)}          │\n`;
+  table += `╘══╧════════════════════╩═══════════════════════════╛\n`;
+  if (!preRoll && result) {
+    table += `╱ ╱ handResult: ${result.die1} + ${result.die2} == ${result.diceSum} => ${result.result}\n`;
+  } else {
+    table += `╱ ╱ PREROLL \n`;
   }
   table += `╲ ╲ Balance: ${balance.toString().padStart(4, ' ')}  \n`;
   console.log(table);
-}
-
-module.exports = {
-  buildHeaderLine,
-  rollD6,
-  shoot,
-  playHand,
-  minPassLineMaxOdds, minPassLineOnly
 }

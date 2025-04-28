@@ -1,16 +1,16 @@
-import { playHand } from './index'
-import { minPassLineMaxOdds } from './betting'
-import { HandResult, DiceResult, Memo, Result, distObj } from './consts'
+import { playHand } from './index.js';
+import { minPassLineMaxOdds, dontComeWithPlaceBets } from './betting.js';
+import { HandResult, DiceResult, Memo, Result, distObj } from './consts.js';
 
 const numHands = parseInt(process.argv.slice(2)[0], 10)
 const showDetail = process.argv.slice(2)[1]
 
 console.log(`Simulating ${numHands} Craps Hand(s)`)
-console.log('Using betting strategy: minPassLineMaxOdds')
+console.log('Using betting strategy: dontComeWithPlaceBets')
+console.log(`Show detail: ${showDetail}`)
 
 
-
-class Summary  {
+class Summary {
   balance: number;
   rollCount: number;
   pointsSet: number;
@@ -33,17 +33,17 @@ class Summary  {
     this.neutrals = 0
     this.handCount = 0
     this.dist = new Map();
-    this.dist.set(DiceResult.TWO, new distObj(0, 1/36));
-    this.dist.set(DiceResult.THREE, new distObj(0, 2 / 36 ));
-    this.dist.set(DiceResult.FOUR, new distObj(0, 3 / 36 ));
-    this.dist.set(DiceResult.FIVE, new distObj(0, 4 / 36 ));
-    this.dist.set(DiceResult.SIX, new distObj(0, 5 / 36 ));
-    this.dist.set(DiceResult.SEVEN, new distObj(0, 6 / 36 ));
-    this.dist.set(DiceResult.EIGHT, new distObj(0, 5 / 36 ));
-    this.dist.set(DiceResult.NINE, new distObj(0, 4 / 36 ));
-    this.dist.set(DiceResult.TEN, new distObj(0, 3 / 36 ));
-    this.dist.set(DiceResult.ELEVEN, new distObj(0, 2 / 36 ));
-    this.dist.set(DiceResult.TWELVE, new distObj(0, 1 / 36 ));
+    this.dist.set(DiceResult.TWO, new distObj(0, 1 / 36));
+    this.dist.set(DiceResult.THREE, new distObj(0, 2 / 36));
+    this.dist.set(DiceResult.FOUR, new distObj(0, 3 / 36));
+    this.dist.set(DiceResult.FIVE, new distObj(0, 4 / 36));
+    this.dist.set(DiceResult.SIX, new distObj(0, 5 / 36));
+    this.dist.set(DiceResult.SEVEN, new distObj(0, 6 / 36));
+    this.dist.set(DiceResult.EIGHT, new distObj(0, 5 / 36));
+    this.dist.set(DiceResult.NINE, new distObj(0, 4 / 36));
+    this.dist.set(DiceResult.TEN, new distObj(0, 3 / 36));
+    this.dist.set(DiceResult.ELEVEN, new distObj(0, 2 / 36));
+    this.dist.set(DiceResult.TWELVE, new distObj(0, 1 / 36));
   }
 }
 
@@ -66,7 +66,7 @@ const rules = {
 console.log(`[table rules] minimum bet: $${rules.minBet}`)
 
 for (let i = 0; i < numHands; i++) {
-  const hand = playHand( rules, minPassLineMaxOdds )
+  const hand = playHand(rules, dontComeWithPlaceBets)
   hand.summary = new Summary()
 
   sessionSummary.balance += hand.balance
@@ -112,14 +112,14 @@ for (let i = 0; i < numHands; i++) {
 }
 
 sessionSummary.handCount = hands.length
-if (!sessionSummary) { throw "missin summary";}
-if (!sessionSummary.dist) { throw "missin summary";}
+if (!sessionSummary) { throw "missin summary"; }
+if (!sessionSummary.dist) { throw "missin summary"; }
 
 for (const k of sessionSummary.dist.keys()) {
 
   const dist = sessionSummary.dist.get(k)
-  if (!dist) { throw "missin dist";}
-  dist.ref = Number((dist.prob* sessionSummary.rollCount).toFixed(1))
+  if (!dist) { throw "missin dist"; }
+  dist.ref = Number((dist.prob * sessionSummary.rollCount).toFixed(1))
   dist.diff = Number((dist.ct - dist.ref).toFixed(1))
   dist.diff_pct = Number((((dist.ct - dist.ref) / dist.ref) * 100).toFixed(1))
   if (showDetail) {

@@ -1,10 +1,7 @@
 import { test } from 'tap'
-import { DiceResult, DieResult, HandResult, Point, Result } from './consts'
-import * as lib from './index'
-//import * as betting from './betting'
-
-
-
+import { BetPoint, DiceResult, DieResult, HandResult, Point, Result } from '../src/consts.js'
+import * as lib from '../src/index.js'
+import { BetDictionary } from '../src/bets.js'
 
 test('roll d6', function (t) {
   const result = lib.rollD6()
@@ -96,7 +93,7 @@ test('comeout', function (suite) {
     t.end()
   })
 
-  
+
   suite.test('4', function (t) {
     const handState: Result = {
       isComeOut: true,
@@ -293,52 +290,86 @@ test('point set', (suite) => {
 test('build header line', (suite) => {
   suite.test('Point.UNDEF', (t) => {
     const headerLine = lib.buildHeaderLine(Point.UNDEF)
-    t.equal(headerLine, '┃ ┃ *DC  ┃   4  ┃   5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
+    t.equal(headerLine, '┃  ┃ \x1b[93m*\x1b[39mDC  ┃   4  ┃   5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.OFF', (t) => {
     const headerLine = lib.buildHeaderLine(Point.OFF)
-    t.equal(headerLine, '┃ ┃ *DC  ┃   4  ┃   5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
+    t.equal(headerLine, '┃  ┃ \x1b[93m*\x1b[39mDC  ┃   4  ┃   5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.FOUR', (t) => {
     const headerLine = lib.buildHeaderLine(Point.FOUR)
-    t.equal(headerLine, '┃ ┃  DC  ┃  *4  ┃   5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
+    t.equal(headerLine, '┃  ┃  DC  ┃  \x1b[93m*\x1b[39m4  ┃   5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.FIVE', (t) => {
     const headerLine = lib.buildHeaderLine(Point.FIVE)
-    t.equal(headerLine, '┃ ┃  DC  ┃   4  ┃  *5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
+    t.equal(headerLine, '┃  ┃  DC  ┃   4  ┃  \x1b[93m*\x1b[39m5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.SIX', (t) => {
     const headerLine = lib.buildHeaderLine(Point.SIX)
-    t.equal(headerLine, '┃ ┃  DC  ┃   4  ┃   5  ┃  *6  ┃   8  ┃   9  ┃  10  ┃')
+    t.equal(headerLine, '┃  ┃  DC  ┃   4  ┃   5  ┃  \x1b[93m*\x1b[39m6  ┃   8  ┃   9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.EIGHT', (t) => {
     const headerLine = lib.buildHeaderLine(Point.EIGHT)
-    t.equal(headerLine, '┃ ┃  DC  ┃   4  ┃   5  ┃   6  ┃  *8  ┃   9  ┃  10  ┃')
+    t.equal(headerLine, '┃  ┃  DC  ┃   4  ┃   5  ┃   6  ┃  \x1b[93m*\x1b[39m8  ┃   9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.NINE', (t) => {
     const headerLine = lib.buildHeaderLine(Point.NINE)
-    t.equal(headerLine, '┃ ┃  DC  ┃   4  ┃   5  ┃   6  ┃   8  ┃  *9  ┃  10  ┃')
+    t.equal(headerLine, '┃  ┃  DC  ┃   4  ┃   5  ┃   6  ┃   8  ┃  \x1b[93m*\x1b[39m9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.TEN', (t) => {
     const headerLine = lib.buildHeaderLine(Point.TEN)
-    t.equal(headerLine, '┃ ┃  DC  ┃   4  ┃   5  ┃   6  ┃   8  ┃   9  ┃ *10  ┃')
+    t.equal(headerLine, '┃  ┃  DC  ┃   4  ┃   5  ┃   6  ┃   8  ┃   9  ┃ \x1b[93m*\x1b[39m10  ┃')
     t.end()
   })
 
 
   suite.end()
 })
+//\x1b[32m1000\x1b[39m
+test('dcbets', (suite) => {
+  suite.test('empty', (t) => {
+    const bets = new BetDictionary()
+    const result = lib.dcbets(bets)
+    t.equal(result, '      ┃      ┃      ┃      ┃      ┃      ┃      ┃')
+    t.end()
+  })
+
+  suite.test('with 3 digit bets', (t) => {
+    const bets = new BetDictionary()
+    bets.addBet(BetPoint.DontComePoint4, 100)
+    const result = lib.dcbets(bets)
+    t.equal(result, '      ┃ \x1b[32m 100\x1b[39m ┃      ┃      ┃      ┃      ┃      ┃')
+    t.end()
+  })
+
+  suite.test('with 4 digit bets', (t) => {
+    const bets = new BetDictionary()
+    bets.addBet(BetPoint.DontComePoint4, 1000)
+    const result = lib.dcbets(bets)
+    t.equal(result, '      ┃ \x1b[32m1000\x1b[39m ┃      ┃      ┃      ┃      ┃      ┃')
+    t.end()
+  })
+
+  suite.test('with 3 DC digit bets', (t) => {
+    const bets = new BetDictionary()
+    bets.addBet(BetPoint.DontCome, 100)
+    const result = lib.dcbets(bets)
+    t.equal(result, ' \x1b[32m 100\x1b[39m ┃      ┃      ┃      ┃      ┃      ┃      ┃')
+    t.end()
+  })
+  suite.end()
+}) 

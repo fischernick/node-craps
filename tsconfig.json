@@ -1,12 +1,24 @@
 {
   "compilerOptions": {
-    "module": "nodenext",
-    "rootDir": ".",
-    "outDir": "./built",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": "./src",
+    "outDir": "./dist",
     "allowJs": true,
-    "target": "es6",
+    "target": "es2022",
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
-  "include": ["./**/*"]
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifiers": true
+  },
+  "include": [
+    "./src/**/*"
+  ]
 }

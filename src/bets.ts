@@ -1,4 +1,4 @@
-import { BetPoint, Memo, Point } from './consts';
+import { BetPoint, Memo, Point } from './consts.js';
 
 export type Bet = {
     amount: number;
@@ -35,9 +35,12 @@ export class BetDictionary {
 
     copy(): BetDictionary {
         const copy = new BetDictionary()
+        copy.newBetSum = this.newBetSum
+        copy.payoutSum = this.payoutSum
         Object.values(BetPoint).forEach(value => {
             if (typeof value === 'number') {
                 copy.addBet(value, this[value].amount)
+                copy[value].isContract = this[value].isContract
             }
         })
         return copy
