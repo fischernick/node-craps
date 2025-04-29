@@ -1,6 +1,6 @@
 import {
   BetPoint, BetPointPayouts, DiceResult, HandResult, Memo, Rules, type Result, type Payout, diceResultAsPoint, Point,
-  DontComePointBets, PlaceBets,
+  DontComeBetPoints, PlaceBetPoints,
   getPlaceBetPoint
 } from './consts.js'
 import { BetDictionary } from './bets.js'
@@ -76,14 +76,14 @@ function getDontComePointBet(diceSum: DiceResult): BetPoint | undefined {
 
 export function placeBets(bets: BetDictionary, hand: Result, rules: Rules): Settlement {
 
-  //const placeBets = PlaceBets.map(bet => bets.getBet(bet))
-  if (PlaceBets.every(betPoint => bets.getBet(betPoint) === undefined)) {
+  //const placeBets = PlaceBetPoints.map(bet => bets.getBet(bet))
+  if (PlaceBetPoints.every(betPoint => bets.getBet(betPoint) === undefined)) {
     return { bets }
   }
 
   // if the dice sum is 7, clear all place bets
   if (hand.diceSum === DiceResult.SEVEN) {
-    for (const bet of PlaceBets) {
+    for (const bet of PlaceBetPoints) {
       if (bets.getBet(bet)) {
         bets.clearBet(bet)
       }
@@ -138,7 +138,7 @@ export function dontComeBets(bets: BetDictionary, hand: Result, rules: Rules): S
   let hasPayout = false
   // check if any dont come bets are on the table that will pay out
   // 4,5,6,8,9,10.  DC will payout on craps {2,3} but not 12.
-  for (const betPoint of [...DontComePointBets, BetPoint.DontCome]) {
+  for (const betPoint of [...DontComeBetPoints, BetPoint.DontCome]) {
     if (rbets.getBet(betPoint)) {
       hasPayout = true
       break
@@ -172,7 +172,7 @@ export function dontComeBets(bets: BetDictionary, hand: Result, rules: Rules): S
 
   // 7 out payout on pointed dont come point bets
   if (DiceResult.SEVEN === hand.diceSum) {
-    for (const betPoint of DontComePointBets) {
+    for (const betPoint of DontComeBetPoints) {
       const bet = rbets.getBet(betPoint)
       if (bet) {
         payout.principal += bet.amount
@@ -181,8 +181,6 @@ export function dontComeBets(bets: BetDictionary, hand: Result, rules: Rules): S
         rbets.clearBet(betPoint)
       }
     }
-  // this is a 7 so lets return
-    delete rbets.notes.dontCome
 
     return { bets: rbets, payout }
   }
@@ -240,13 +238,18 @@ export function settleAllBets(bets: BetDictionary, hand: Result, rules: any): { 
     bets.setContract([BetPoint.Pass, BetPoint.DontPass], false)
   }
 
-  const allTheBets = [placeBets, dontComeBets, passLine, passOdds]
-  for (const bet of allTheBets) {
-    const result = bet(bets, hand, rules)
+  const allTheSettlements = [placeBets, dontComeBets, passLine, passOdds]
+  for (const betSettler of allTheSettlements) {
+    const result = betSettler(bets, hand, rules)
     bets = result.bets
     if (result.payout) {
       payouts.push(result.payout)
     }
+  }
+
+  if (!DontComeBetPoints.find(bet => bets.getBet(bet)) && !PlaceBetPoints.find(bet => bets.getBet(bet))) {
+    if (process.env.DEBUG) console.log(`no dont come or place bets on the table`)
+    delete bets.notes.dontCome
   }
 
   bets.payoutSum = payouts.reduce((memo: Memo, payout) => {

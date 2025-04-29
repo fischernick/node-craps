@@ -1,4 +1,4 @@
-import { type Result, BetPoint, DontComePointBets, Rules } from "./consts.js";
+import { type Result, BetPoint, DontComeBetPoints, Rules } from "./consts.js";
 import { BetDictionary } from "./bets.js";
 
 export type HandOptions = {
@@ -51,7 +51,7 @@ export function dontComeWithPlaceBets(opts: HandOptions): BetDictionary {
   const { rules, hand, bets } = opts
   if (!hand.isComeOut) {
     // check all the dont come point bets for an existing dont come bet
-    const dontComeBet = DontComePointBets.find(bet => bets?.getBet(bet))
+    const dontComeBet = DontComeBetPoints.find(bet => bets?.getBet(bet))
     let theseBets = bets ?? new BetDictionary()
 
     if (!dontComeBet && !theseBets.notes.dontCome) {

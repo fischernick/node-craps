@@ -134,7 +134,7 @@ export function dcbets(bets: BetDictionary): string {
   dcPoints.forEach((p, i) => {
     const bet = bets.getBet(p);
     if (bet) {
-      tots += ` ${chalk.green(bet.amount.toString().padStart(4, ' '))} ┃`;
+      tots += ` ${chalk.inverse(bet.amount.toString().padStart(4, ' '))} ┃`;
     } else {
       tots += `      ┃`;
     }

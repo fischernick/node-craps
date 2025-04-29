@@ -2,6 +2,7 @@ import { playHand, rollD6 } from './index.js';
 import { minPassLineMaxOdds, dontComeWithPlaceBets } from './betting.js';
 import { HandResult, DiceResult, Memo, Result, distObj } from './consts.js';
 import fs from 'fs';
+import chalk from 'chalk';
 
 let numHands = parseInt(process.argv.slice(2)[0], 10)
 const showDetail = process.argv.slice(2)[1]
@@ -12,6 +13,7 @@ console.log(`Simulating ${numHands} Craps Hand(s)`)
 console.log('Using betting strategy: dontComeWithPlaceBets')
 console.log(`Show detail: ${showDetail}`)
 
+const startingBalance = 5000  
 
 class Summary {
   balance: number;
@@ -93,7 +95,7 @@ const roller = (): number => {
 }
 
 const sessionSummary = new Summary();
-sessionSummary.balance = 5000;
+sessionSummary.balance = startingBalance;
 const hands = []
 const rules = {
   minBet: 5,
@@ -192,7 +194,8 @@ console.log('\nSession Summary')
 console.log(`┌───────────────────┬──────────┐`);
 console.log(`│ Key               │ Values   │`);
 console.log(`├───────────────────┼──────────┤`);
-console.log(`│ Balance:          │ $${sessionSummary.balance.toString().padStart(7)} │`)
+console.log(`│ Starting balance: │ $${startingBalance.toString().padStart(7)} │`)
+console.log(`│ Balance:          │ $${sessionSummary.balance > startingBalance ? chalk.green(sessionSummary.balance.toString().padStart(7)) : chalk.red(sessionSummary.balance.toString().padStart(7))} │`)
 console.log(`│ Roll Count:       │ ${sessionSummary.rollCount.toString().padStart(8)} │`)
 console.log(`│ Points Set:       │ ${sessionSummary.pointsSet.toString().padStart(8)} │`)
 console.log(`│ Points Won:       │ ${sessionSummary.pointsWon.toString().padStart(8)} │`)
@@ -202,22 +205,77 @@ console.log(`│ Net Come Out Wins:│ ${sessionSummary.netComeOutWins.toString(
 console.log(`│ Neutrals:         │ ${sessionSummary.neutrals.toString().padStart(8)} │`)
 console.log(`│ Hand Count:       │ ${sessionSummary.handCount.toString().padStart(8)} │`)
 console.log(`└───────────────────┴──────────┘`);
-console.log('\nHands Summary')
-
-hands.forEach((hand, index) => {
-  delete hand.summary.dist
-  console.log(`\nHand ${index + 1}:`)
-  console.log(`  Balance: $${hand.summary.balance}`)
-  console.log(`  Roll Count: ${hand.summary.rollCount}`)
-  console.log(`  Points Set: ${hand.summary.pointsSet}`)
-  console.log(`  Points Won: ${hand.summary.pointsWon}`)
-  console.log(`  Come Out Wins: ${hand.summary.comeOutWins}`)
-  console.log(`  Come Out Losses: ${hand.summary.comeOutLosses}`)
-  console.log(`  Net Come Out Wins: ${hand.summary.netComeOutWins}`)
-  console.log(`  Neutrals: ${hand.summary.neutrals}`)
-})
 
 if (showDetail === '1' || showDetail === 'true') {
+  const pr = (s: string): string => s.padEnd(19);
+  const pd = (s: string): string => s.padStart(6);
+
+
+  let row = 0
+  let handCount = 0
+  while (row <= hands.length / 5 && handCount < hands.length) {
+    let handsSummary = []
+    //───────┬───────┬───────┬───────┬───────┐
+    //───────┴───────┴───────┴───────┴───────┘
+    handsSummary.push('┌─────────────────────');
+    handsSummary.push('│ ' + pr('HAND'));
+    handsSummary.push('│ ' + pr('Balance:'));
+    handsSummary.push('│ ' + pr('Roll Count:'));
+    handsSummary.push('│ ' + pr('Points Set:'));
+    handsSummary.push('│ ' + pr('Points Won:'));
+    handsSummary.push('│ ' + pr('Come Out Wins:'));
+    handsSummary.push('│ ' + pr('Come Out Losses:'));
+    handsSummary.push('│ ' + pr('Net Come Out Wins:'));
+    handsSummary.push('│ ' + pr('Neutrals:'));
+    handsSummary.push('└─────────────────────');
+    for (let i = 0; i < 5 && handCount < hands.length; i++) {
+      const hand = hands[handCount++]
+      delete hand.summary.dist
+      handsSummary[0] += '┬───────'
+      handsSummary[1] += ' │' + pd(handCount.toString());
+      handsSummary[2] += ' │' + pd('$' + hand.summary.balance.toString());
+      handsSummary[3] += ' │' + pd(hand.summary.rollCount.toString());
+      handsSummary[4] += ' │' + pd(hand.summary.pointsSet.toString());
+      handsSummary[5] += ' │' + pd(hand.summary.pointsWon.toString());
+      handsSummary[6] += ' │' + pd(hand.summary.comeOutWins.toString());
+      handsSummary[7] += ' │' + pd(hand.summary.comeOutLosses.toString());
+      handsSummary[8] += ' │' + pd(hand.summary.netComeOutWins.toString());
+      handsSummary[9] += ' │' + pd(hand.summary.neutrals.toString());
+      handsSummary[10] += '┴───────'
+    }
+    handsSummary[0] += '┐'
+    handsSummary[1] += ' │'
+    handsSummary[2] += ' │'
+    handsSummary[3] += ' │'
+    handsSummary[4] += ' │'
+    handsSummary[5] += ' │'
+    handsSummary[6] += ' │'
+    handsSummary[7] += ' │'
+    handsSummary[8] += ' │'
+    handsSummary[9] += ' │'
+    handsSummary[10] += '┘'
+
+    for (let i = 0; i < 11; i++) {
+      console.log(handsSummary[i])
+    }
+    row += 1
+  }
+
+  // hands.forEach((hand, index) => {
+  //   delete hand.summary.dist
+  //   console.log(`\nHand ${index + 1}:`)
+  //   console.log(`  Balance: $${hand.summary.balance}`)
+  //   console.log(`  Roll Count: ${hand.summary.rollCount}`)
+  //   console.log(`  Points Set: ${hand.summary.pointsSet}`)
+  //   console.log(`  Points Won: ${hand.summary.pointsWon}`)
+  //   console.log(`  Come Out Wins: ${hand.summary.comeOutWins}`)
+  //   console.log(`  Come Out Losses: ${hand.summary.comeOutLosses}`)
+  //   console.log(`  Net Come Out Wins: ${hand.summary.netComeOutWins}`)
+  //   console.log(`  Neutrals: ${hand.summary.neutrals}`)
+  // })
+}
+
+if (showDetail === '55' || showDetail === '5s') {
   console.log('\nDetailed Hand History:');
   hands.forEach((hand, handIndex) => {
     console.log(`\nHand ${handIndex + 1} History:`);

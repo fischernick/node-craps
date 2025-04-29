@@ -95,8 +95,8 @@ enum BetPoint {
     DontComePoint10 = 19,
 }
 
-const DontComePointBets = [BetPoint.DontComePoint4, BetPoint.DontComePoint5, BetPoint.DontComePoint6, BetPoint.DontComePoint8, BetPoint.DontComePoint9, BetPoint.DontComePoint10]
-const PlaceBets = [BetPoint.Place4, BetPoint.Place5, BetPoint.Place6, BetPoint.Place8, BetPoint.Place9, BetPoint.Place10]
+const DontComeBetPoints = [BetPoint.DontComePoint4, BetPoint.DontComePoint5, BetPoint.DontComePoint6, BetPoint.DontComePoint8, BetPoint.DontComePoint9, BetPoint.DontComePoint10]
+const PlaceBetPoints = [BetPoint.Place4, BetPoint.Place5, BetPoint.Place6, BetPoint.Place8, BetPoint.Place9, BetPoint.Place10]
 
 // define function to get place bet point from dice sum
 export function getPlaceBetPoint(diceSum: DiceResult): BetPoint | undefined {
@@ -241,6 +241,6 @@ export {
     DieResult,
     distObj,
     Rules,
-    DontComePointBets,
-    PlaceBets
+    DontComeBetPoints,
+    PlaceBetPoints
 }
