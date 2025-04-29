@@ -1,9 +1,12 @@
-import { playHand } from './index.js';
+import { playHand, rollD6 } from './index.js';
 import { minPassLineMaxOdds, dontComeWithPlaceBets } from './betting.js';
 import { HandResult, DiceResult, Memo, Result, distObj } from './consts.js';
+import fs from 'fs';
 
-const numHands = parseInt(process.argv.slice(2)[0], 10)
+let numHands = parseInt(process.argv.slice(2)[0], 10)
 const showDetail = process.argv.slice(2)[1]
+const handsFile = process.argv.slice(2)[2]
+console.log(`handsFile: ${handsFile}`)  
 
 console.log(`Simulating ${numHands} Craps Hand(s)`)
 console.log('Using betting strategy: dontComeWithPlaceBets')
@@ -47,6 +50,47 @@ class Summary {
   }
 }
 
+// if the handsFile is provided and is valid json {d1: 1, d2: 2}, read the hands from the file and put them in a roll array
+let rolls: { d1: number, d2: number }[] = [];
+if (handsFile) {
+  try {
+    const fileContents = fs.readFileSync(handsFile, 'utf8');
+    const parsedRolls = JSON.parse(fileContents);
+    if (Array.isArray(parsedRolls) && parsedRolls.every(roll =>
+      typeof roll === 'object' &&
+      typeof roll.d1 === 'number' &&
+      typeof roll.d2 === 'number'
+    )) {
+      rolls = parsedRolls;
+      numHands = 1;
+      console.log(`[rolls] loaded ${rolls.length} rolls from ${handsFile}`)
+      console.log(`[rolls] ${JSON.stringify(rolls)}`)
+    } else {
+      throw new Error('Invalid roll format - each roll must have d1 and d2 numbers');
+    }
+  } catch (err) {
+    console.error('Error reading rolls file:', err);
+    process.exit(1);
+  }
+}
+
+let shootCount = 0;
+let rollCount = 0;
+const roller = (): number => {
+  if (shootCount >= rolls.length) {
+    console.log(`[roller] shootCount: ${shootCount} >= rolls.length: ${rolls.length}`)
+    return rollD6();
+  }
+  if (rolls.length > 0) {
+    if (rollCount % 2 === 0) {
+      rollCount++;
+      return rolls[shootCount].d1;
+    }
+    rollCount++;
+    return rolls[shootCount++].d2;
+  }
+  return rollD6();
+}
 
 const sessionSummary = new Summary();
 sessionSummary.balance = 5000;
@@ -66,7 +110,12 @@ const rules = {
 console.log(`[table rules] minimum bet: $${rules.minBet}`)
 
 for (let i = 0; i < numHands; i++) {
-  const hand = playHand(rules, dontComeWithPlaceBets)
+  let hand
+  if (rolls.length > 0) {
+    hand = playHand(rules, dontComeWithPlaceBets, roller)
+  } else {
+    hand = playHand(rules, dontComeWithPlaceBets)
+  }
   hand.summary = new Summary()
 
   sessionSummary.balance += hand.balance
@@ -168,6 +217,16 @@ hands.forEach((hand, index) => {
   console.log(`  Neutrals: ${hand.summary.neutrals}`)
 })
 
-if (showDetail) {
-  console.table(hands.map(hand => hand.history))
+if (showDetail === '1' || showDetail === 'true') {
+  console.log('\nDetailed Hand History:');
+  hands.forEach((hand, handIndex) => {
+    console.log(`\nHand ${handIndex + 1} History:`);
+    hand.history.forEach((roll: Result, rollIndex: number) => {
+      console.log(`  Roll ${rollIndex + 1}:`);
+      console.log(`    Dice: ${roll.die1} + ${roll.die2} = ${roll.diceSum}`);
+      console.log(`    Result: ${roll.result}`);
+      console.log(`    Point: ${roll.point}`);
+      console.log(`    Come Out: ${roll.isComeOut}`);
+    });
+  });
 }

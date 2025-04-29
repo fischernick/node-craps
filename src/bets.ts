@@ -21,6 +21,8 @@ export class BetDictionary {
     [key: number]: Bet;
     newBetSum: number;
     payoutSum?: Memo;
+    // bag of keys for specific strategies
+    notes: Record<string, string>;
 
     constructor() {
         // Initialize all enum values with default bets
@@ -31,8 +33,13 @@ export class BetDictionary {
         });
 
         this.newBetSum = 0;
+        this.notes = {};
     }
 
+    /**
+     * Copy the bet dictionary
+     * @returns A copy of the bet dictionary
+     */
     copy(): BetDictionary {
         const copy = new BetDictionary()
         copy.newBetSum = this.newBetSum
@@ -42,6 +49,7 @@ export class BetDictionary {
                 copy[betPoint] = { amount: this[betPoint].amount, isContract: this[betPoint].isContract, set: this[betPoint].set };
             }
         })
+        copy.notes = { ...this.notes };
         return copy
     }
 
@@ -86,6 +94,7 @@ export class BetDictionary {
      * @param betPoint The type of bet to clear
      */
     clearBet(betPoint: BetPoint): void {
+        if (process.env.DEBUG) console.log(`clearBet: ${BetPoint[betPoint].toString()}`);
         this[betPoint] = { amount: 0, isContract: false, set: false };
     }
 

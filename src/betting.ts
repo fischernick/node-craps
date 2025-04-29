@@ -54,16 +54,18 @@ export function dontComeWithPlaceBets(opts: HandOptions): BetDictionary {
     const dontComeBet = DontComePointBets.find(bet => bets?.getBet(bet))
     let theseBets = bets ?? new BetDictionary()
 
-    if (!dontComeBet) {
+    if (!dontComeBet && !theseBets.notes.dontCome) {
     // no dont come bet, add one
-      theseBets.addBet(BetPoint.DontCome, 60)      
-    }
+      theseBets.addBet(BetPoint.DontCome, 60)
+      theseBets.notes.dontCome = "set"
 
-    // if there is not a dont come bet on the same number, add the place bet
-    if (!bets?.getBet(BetPoint.DontComePoint5) && !bets?.getBet(BetPoint.Place5)) theseBets.addBet(BetPoint.Place5, 15)
-    if (!bets?.getBet(BetPoint.DontComePoint6) && !bets?.getBet(BetPoint.Place6)) theseBets.addBet(BetPoint.Place6, 18)
-    if (!bets?.getBet(BetPoint.DontComePoint8) && !bets?.getBet(BetPoint.Place8)) theseBets.addBet(BetPoint.Place8, 18)
-    if (!bets?.getBet(BetPoint.DontComePoint9) && !bets?.getBet(BetPoint.Place9)) theseBets.addBet(BetPoint.Place9, 15)
+
+      // if there is not a dont come bet on the same number, add the place bet
+      if (!bets?.getBet(BetPoint.DontComePoint5) && !bets?.getBet(BetPoint.Place5)) theseBets.addBet(BetPoint.Place5, 15)
+      if (!bets?.getBet(BetPoint.DontComePoint6) && !bets?.getBet(BetPoint.Place6)) theseBets.addBet(BetPoint.Place6, 18)
+      if (!bets?.getBet(BetPoint.DontComePoint8) && !bets?.getBet(BetPoint.Place8)) theseBets.addBet(BetPoint.Place8, 18)
+      if (!bets?.getBet(BetPoint.DontComePoint9) && !bets?.getBet(BetPoint.Place9)) theseBets.addBet(BetPoint.Place9, 15)
+    }
     return theseBets
   }
   return bets ? bets : new BetDictionary()

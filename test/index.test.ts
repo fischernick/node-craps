@@ -290,49 +290,49 @@ test('point set', (suite) => {
 test('build header line', (suite) => {
   suite.test('Point.UNDEF', (t) => {
     const headerLine = lib.buildHeaderLine(Point.UNDEF)
-    t.equal(headerLine, '┃  ┃ \x1b[93m*\x1b[39mDC  ┃   4  ┃   5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
+    t.equal(headerLine, ' \x1b[93m*\x1b[39mDC  ┃   4  ┃   5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.OFF', (t) => {
     const headerLine = lib.buildHeaderLine(Point.OFF)
-    t.equal(headerLine, '┃  ┃ \x1b[93m*\x1b[39mDC  ┃   4  ┃   5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
+    t.equal(headerLine, ' \x1b[93m*\x1b[39mDC  ┃   4  ┃   5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.FOUR', (t) => {
     const headerLine = lib.buildHeaderLine(Point.FOUR)
-    t.equal(headerLine, '┃  ┃  DC  ┃  \x1b[93m*\x1b[39m4  ┃   5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
+    t.equal(headerLine, '  DC  ┃  \x1b[93m*\x1b[39m4  ┃   5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.FIVE', (t) => {
     const headerLine = lib.buildHeaderLine(Point.FIVE)
-    t.equal(headerLine, '┃  ┃  DC  ┃   4  ┃  \x1b[93m*\x1b[39m5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
+    t.equal(headerLine, '  DC  ┃   4  ┃  \x1b[93m*\x1b[39m5  ┃   6  ┃   8  ┃   9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.SIX', (t) => {
     const headerLine = lib.buildHeaderLine(Point.SIX)
-    t.equal(headerLine, '┃  ┃  DC  ┃   4  ┃   5  ┃  \x1b[93m*\x1b[39m6  ┃   8  ┃   9  ┃  10  ┃')
+    t.equal(headerLine, '  DC  ┃   4  ┃   5  ┃  \x1b[93m*\x1b[39m6  ┃   8  ┃   9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.EIGHT', (t) => {
     const headerLine = lib.buildHeaderLine(Point.EIGHT)
-    t.equal(headerLine, '┃  ┃  DC  ┃   4  ┃   5  ┃   6  ┃  \x1b[93m*\x1b[39m8  ┃   9  ┃  10  ┃')
+    t.equal(headerLine, '  DC  ┃   4  ┃   5  ┃   6  ┃  \x1b[93m*\x1b[39m8  ┃   9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.NINE', (t) => {
     const headerLine = lib.buildHeaderLine(Point.NINE)
-    t.equal(headerLine, '┃  ┃  DC  ┃   4  ┃   5  ┃   6  ┃   8  ┃  \x1b[93m*\x1b[39m9  ┃  10  ┃')
+    t.equal(headerLine, '  DC  ┃   4  ┃   5  ┃   6  ┃   8  ┃  \x1b[93m*\x1b[39m9  ┃  10  ┃')
     t.end()
   })
 
   suite.test('Point.TEN', (t) => {
     const headerLine = lib.buildHeaderLine(Point.TEN)
-    t.equal(headerLine, '┃  ┃  DC  ┃   4  ┃   5  ┃   6  ┃   8  ┃   9  ┃ \x1b[93m*\x1b[39m10  ┃')
+    t.equal(headerLine, '  DC  ┃   4  ┃   5  ┃   6  ┃   8  ┃   9  ┃ \x1b[93m*\x1b[39m10  ┃')
     t.end()
   })
 
