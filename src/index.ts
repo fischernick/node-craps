@@ -77,7 +77,7 @@ export function playHand(rules: any, bettingStrategy: BettingStrategy, roll = ro
     if (process.env.DEBUG && bets.newBetSum) console.log(`[bet] new bet $${bets.newBetSum} ($${balance})`)
     bets.newBetSum = 0
 
-    displayTable(true, bets, hand.point, balance, hand);
+    // displayTable(true, bets, hand.point, balance, hand);
 
 
     hand = shoot(
@@ -91,7 +91,7 @@ export function playHand(rules: any, bettingStrategy: BettingStrategy, roll = ro
     var newPayouts: Payout[] | undefined = [];
     ({ bets, newPayouts } = settleAllBets(bets, hand, rules));
 
-    displayTable(false, bets, hand.point, balance, hand, newPayouts);
+    //displayTable(false, bets, hand.point, balance, hand, newPayouts);
 
     if (bets?.payoutSum) {
       balance += bets.payoutSum.total
@@ -181,7 +181,10 @@ function displayTable(preRoll: boolean, bets: BetDictionary, point: Point, balan
 
   let balanceLine = `Balance: ${balance.toString().padStart(4, ' ')}`
   if (!preRoll) {
-    balanceLine += ` + ${(bets.payoutSum?.total ?? 0) > 0 ? chalk.green(`+${bets.payoutSum?.total}`) : bets.payoutSum?.total} = ${balance + (bets.payoutSum?.total ?? 0)}`;
+    const payoutSum = bets.payoutSum?.total ?? 0
+    const payoutColor = payoutSum > 0 ? chalk.greenBright : chalk.redBright
+    const sumColor = balance + payoutSum > 0 ? chalk.green : chalk.red
+    balanceLine += ` + ${payoutColor(`${payoutSum}`)} = ${sumColor(`${balance + payoutSum}`)}`;
   }
 
   let rollLine = preRoll ? '' : `Roll: ${result?.die1}+${result?.die2}> ${result?.diceSum} => ${result?.result}`;

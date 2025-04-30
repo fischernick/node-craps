@@ -1,5 +1,5 @@
 import {
-  BetPoint, BetPointPayouts, DiceResult, HandResult, Memo, Rules, type Result, type Payout, diceResultAsPoint, Point,
+  BetPoint, BetPointPayouts, DiceResult, HandResult, Summary, Rules, type Result, type Payout, diceResultAsPoint, Point,
   DontComeBetPoints, PlaceBetPoints,
   getPlaceBetPoint
 } from './consts.js'
@@ -161,7 +161,7 @@ export function dontComeBets(bets: BetDictionary, hand: Result, rules: Rules): S
   // craps {2,3} bar 12 payout on dont come bet
   if ([DiceResult.TWO, DiceResult.THREE].includes(hand.diceSum)) {
     if (dontComeBet) {
-      console.log(`CRAPS dice: ${hand.diceSum} ; dont come bet::  ${JSON.stringify(dontComeBet)}`)
+
       payout.principal += dontComeBet?.amount ?? 0;
       payout.profit += (dontComeBet?.amount ?? 0) * (getPayout(BetPoint.DontCome, hand.diceSum) ?? 0)
       rbets.clearBet(BetPoint.DontCome)
@@ -252,28 +252,15 @@ export function settleAllBets(bets: BetDictionary, hand: Result, rules: any): { 
     delete bets.notes.dontCome
   }
 
-  bets.payoutSum = payouts.reduce((memo: Memo, payout) => {
+  bets.payoutSum = payouts.reduce((memo: Summary, payout) => {
     if (!payout) return memo
 
     memo.principal += payout.principal
     memo.profit += payout.profit
     memo.total += payout.principal + payout.profit
-    memo.ledger.push(payout)
+    //memo.ledger.push(payout)
     return memo
-  }, {
-    principal: 0,
-    profit: 0,
-    total: 0,
-    ledger: [],
-    rollCount: 0,
-    neutrals: 0,
-    comeOutWins: 0,
-    comeOutLosses: 0,
-    netComeOutWins: 0,
-    pointsSet: 0,
-    pointsWon: 0,
-    dist: new Map()
-  } as Memo)
+  }, new Summary())
 
   return { bets, newPayouts: payouts }
 }

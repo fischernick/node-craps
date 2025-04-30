@@ -1,4 +1,4 @@
-import { BetPoint, Memo, Point } from './consts.js';
+import { BetPoint, Summary, Point } from './consts.js';
 
 export type Bet = {
     amount: number;
@@ -20,7 +20,7 @@ function isContractBet(betPoint: BetPoint): boolean {
 export class BetDictionary {
     [key: number]: Bet;
     newBetSum: number;
-    payoutSum?: Memo;
+    payoutSum?: Summary;
     // bag of keys for specific strategies
     notes: Record<string, string>;
 

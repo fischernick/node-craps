@@ -61,7 +61,14 @@ type Result = {
     isComeOut?: boolean;
     point: Point;
 }
-
+/**
+ * Represents a payout for a bet
+ */
+type Payout = {
+    type: HandResult | string;
+    principal: number;
+    profit: number;
+}
 enum HandResult {
     NEW_GAME = 'new game',
     COMEOUT_LOSS = 'comeout loss',
@@ -118,14 +125,7 @@ export function getPlaceBetPoint(diceSum: DiceResult): BetPoint | undefined {
     }
 }
 
-/**
- * Represents a payout for a bet
- */
-export type Payout = {
-    type: HandResult | string;
-    principal: number;
-    profit: number;
-}
+
 
 type PayoutMap = Partial<Record<DiceResult, number>>;
 
@@ -200,22 +200,47 @@ interface Rules {
     maxOddsMultiple: Record<Point, number>;
 }
 
-type Memo = {
-    principal: number;
-    profit: number;
-    total: number;
-    ledger: any[];
 
-    rollCount: number;
+class Summary {
+    principal: number = 0;
+    profit: number = 0;
+    balance: number;
+    total: number = 0;
+    //ledger: Result[] = [];
+    rollCount: number = 0;
+    pointsSet: number = 0;
+    pointsWon: number = 0;
+    comeOutWins: number = 0;
+    comeOutLosses: number = 0;
+    netComeOutWins: number = 0;
     neutrals: number;
-    comeOutWins: number;
-    comeOutLosses: number;
-    netComeOutWins: number;
-    pointsSet: number;
-    pointsWon: number;
-    dist: Map<DiceResult, distObj>;
-}
+    handCount: number;
+    dist?: Map<DiceResult, distObj>;
 
+    constructor() {
+        this.balance = 0;
+        this.rollCount = 0;
+        this.pointsSet = 0;
+        this.pointsWon = 0;
+        this.comeOutWins = 0;
+        this.comeOutLosses = 0;
+        this.netComeOutWins = 0;
+        this.neutrals = 0;
+        this.handCount = 0;
+        this.dist = new Map();
+        this.dist.set(DiceResult.TWO, new distObj(0, 1 / 36));
+        this.dist.set(DiceResult.THREE, new distObj(0, 2 / 36));
+        this.dist.set(DiceResult.FOUR, new distObj(0, 3 / 36));
+        this.dist.set(DiceResult.FIVE, new distObj(0, 4 / 36));
+        this.dist.set(DiceResult.SIX, new distObj(0, 5 / 36));
+        this.dist.set(DiceResult.SEVEN, new distObj(0, 6 / 36));
+        this.dist.set(DiceResult.EIGHT, new distObj(0, 5 / 36));
+        this.dist.set(DiceResult.NINE, new distObj(0, 4 / 36));
+        this.dist.set(DiceResult.TEN, new distObj(0, 3 / 36));
+        this.dist.set(DiceResult.ELEVEN, new distObj(0, 2 / 36));
+        this.dist.set(DiceResult.TWELVE, new distObj(0, 1 / 36));
+    }
+}
 
 class distObj {
     ct: number;
@@ -236,11 +261,11 @@ export {
     BetPoint,
     Result,
     BetPointPayouts,
-    Memo,
     Point,
     DieResult,
     distObj,
     Rules,
     DontComeBetPoints,
-    PlaceBetPoints
+    PlaceBetPoints,
+    Summary, Payout
 }

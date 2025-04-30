@@ -14,7 +14,8 @@
     "build": "tsc",
     "start": "node dist/hands.js",
     "dev": "node --loader ts-node/esm src/hands.ts",
-    "devKnownRollSet": "node --loader ts-node/esm src/hands.ts"
+    "devKnownRollSet": "node --loader ts-node/esm src/hands.ts",
+    "run-with-config": "node --loader ts-node/esm src/run-with-config.ts"
   },
   "repository": {
     "type": "git",

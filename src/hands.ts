@@ -1,62 +1,83 @@
 import { playHand, rollD6 } from './index.js';
 import { minPassLineMaxOdds, dontComeWithPlaceBets } from './betting.js';
-import { HandResult, DiceResult, Memo, Result, distObj } from './consts.js';
+import { HandResult, Summary, Result, distObj } from './consts.js';
 import fs from 'fs';
 import chalk from 'chalk';
 
-let numHands = parseInt(process.argv.slice(2)[0], 10)
-const showDetail = process.argv.slice(2)[1]
-const handsFile = process.argv.slice(2)[2]
-console.log(`handsFile: ${handsFile}`)  
+// Configuration type for hands.ts execution
+export type HandsConfig = {
+  numHands: number;
+  showDetail: boolean;
+  startingBalance: number;
+  bettingStrategy: 'dontComeWithPlaceBets' | 'minPassLineMaxOdds' | 'minPassLineOnly';
+  handsFile?: string;
+};
 
-console.log(`Simulating ${numHands} Craps Hand(s)`)
-console.log('Using betting strategy: dontComeWithPlaceBets')
-console.log(`Show detail: ${showDetail}`)
+// Default configuration values
+const defaultConfig: HandsConfig = {
+  numHands: 10,
+  showDetail: false,
+  startingBalance: 5000,
+  bettingStrategy: 'dontComeWithPlaceBets',
+  handsFile: undefined
+};
 
-const startingBalance = 5000  
+// Parse command line arguments or load from config file
+const parseArgs = (): HandsConfig => {
+  const args = process.argv.slice(2);
+  const config: HandsConfig = { ...defaultConfig };
 
-class Summary {
-  balance: number;
-  rollCount: number;
-  pointsSet: number;
-  pointsWon: number;
-  comeOutWins: number;
-  comeOutLosses: number;
-  netComeOutWins: number;
-  neutrals: number;
-  handCount: number;
-  dist?: Map<DiceResult, distObj>;
-
-  constructor() {
-    this.balance = 0
-    this.rollCount = 0
-    this.pointsSet = 0
-    this.pointsWon = 0
-    this.comeOutWins = 0
-    this.comeOutLosses = 0
-    this.netComeOutWins = 0
-    this.neutrals = 0
-    this.handCount = 0
-    this.dist = new Map();
-    this.dist.set(DiceResult.TWO, new distObj(0, 1 / 36));
-    this.dist.set(DiceResult.THREE, new distObj(0, 2 / 36));
-    this.dist.set(DiceResult.FOUR, new distObj(0, 3 / 36));
-    this.dist.set(DiceResult.FIVE, new distObj(0, 4 / 36));
-    this.dist.set(DiceResult.SIX, new distObj(0, 5 / 36));
-    this.dist.set(DiceResult.SEVEN, new distObj(0, 6 / 36));
-    this.dist.set(DiceResult.EIGHT, new distObj(0, 5 / 36));
-    this.dist.set(DiceResult.NINE, new distObj(0, 4 / 36));
-    this.dist.set(DiceResult.TEN, new distObj(0, 3 / 36));
-    this.dist.set(DiceResult.ELEVEN, new distObj(0, 2 / 36));
-    this.dist.set(DiceResult.TWELVE, new distObj(0, 1 / 36));
+  if (args.length > 0) {
+    const numHandsArg = parseInt(args[0], 10);
+    if (!isNaN(numHandsArg)) {
+      config.numHands = numHandsArg;
+    }
   }
-}
+
+  if (args.length > 1) {
+    config.showDetail = args[1] === 'true' || args[1] === '1';
+  }
+
+
+
+  if (args.length > 2) {
+    const startingBalanceArg = parseInt(args[3], 10);
+    if (!isNaN(startingBalanceArg)) {
+      config.startingBalance = startingBalanceArg;
+    }
+  }
+
+  if (args.length > 3) {
+    if (['dontComeWithPlaceBets', 'minPassLineMaxOdds', 'minPassLineOnly'].includes(args[4])) {
+      config.bettingStrategy = args[4] as HandsConfig['bettingStrategy'];
+    }
+  }
+  if (args.length > 4) {
+    config.handsFile = args[2];
+  }
+
+  return config;
+};
+
+const config = parseArgs();
+let numHands: number = config.numHands ?? defaultConfig.numHands;
+const showDetail = config.showDetail ?? defaultConfig.showDetail;
+const startingBalance: number = config.startingBalance ?? defaultConfig.startingBalance;
+const bettingStrategy = config.bettingStrategy ?? defaultConfig.bettingStrategy;
+
+console.log(`handsFile: ${config.handsFile}`);
+
+console.log(`Simulating ${numHands} Craps Hand(s)`);
+console.log(`Using betting strategy: ${bettingStrategy}`);
+console.log(`Show detail: ${showDetail}`);
+console.log(`Starting balance: $${startingBalance}`);
+
 
 // if the handsFile is provided and is valid json {d1: 1, d2: 2}, read the hands from the file and put them in a roll array
 let rolls: { d1: number, d2: number }[] = [];
-if (handsFile) {
+if (config.handsFile) {
   try {
-    const fileContents = fs.readFileSync(handsFile, 'utf8');
+    const fileContents = fs.readFileSync(config.handsFile, 'utf8');
     const parsedRolls = JSON.parse(fileContents);
     if (Array.isArray(parsedRolls) && parsedRolls.every(roll =>
       typeof roll === 'object' &&
@@ -65,8 +86,8 @@ if (handsFile) {
     )) {
       rolls = parsedRolls;
       numHands = 1;
-      console.log(`[rolls] loaded ${rolls.length} rolls from ${handsFile}`)
-      console.log(`[rolls] ${JSON.stringify(rolls)}`)
+      console.log(`[rolls] loaded ${rolls.length} rolls from ${config.handsFile}`);
+      console.log(`[rolls] ${JSON.stringify(rolls)}`);
     } else {
       throw new Error('Invalid roll format - each roll must have d1 and d2 numbers');
     }
@@ -110,9 +131,12 @@ const rules = {
 }
 
 console.log(`[table rules] minimum bet: $${rules.minBet}`)
-
 for (let i = 0; i < numHands; i++) {
-  let hand
+  let hand: {
+    summary: Summary,
+    balance: number,
+    history: Result[]
+  }
   if (rolls.length > 0) {
     hand = playHand(rules, dontComeWithPlaceBets, roller)
   } else {
@@ -123,10 +147,11 @@ for (let i = 0; i < numHands; i++) {
   sessionSummary.balance += hand.balance
   hand.summary.balance = hand.balance
 
-  hand.history.reduce((memo: Memo, roll: Result) => {
+
+  hand.history.reduce((memo: Summary, roll: Result) => {
     memo.rollCount++
     hand.summary.rollCount++
-    const distObj = memo.dist.get(roll.diceSum)
+    const distObj = memo.dist?.get(roll.diceSum)
     if (distObj) distObj.ct++
 
     switch (roll.result) {
@@ -180,40 +205,49 @@ for (const k of sessionSummary.dist.keys()) {
   sessionSummary.dist?.set(k, dist);
 }
 
+const psCt = (s: number, len: number) => s.toString().padStart(len)
+
 console.log('\nDice Roll Distribution')
-console.log(`┌─────┬───────┬──────────┬──────┬────────┐`);
-console.log(`│ Key │ Count │ Expected │ Diff │ Diff % │`);
-console.log(`├─────┼───────┼──────────┼──────┼────────┤`);
+console.log(`┌─────┬───────┬──────────┬────────┬────────┐`);
+console.log(`│ Key │ Count │ Expected │ Diff   │ Diff % │`);
+console.log(`├─────┼───────┼──────────┼────────┼────────┤`);
 for (const [key, value] of sessionSummary.dist.entries()) {
-  console.log(`│ ${key.toString().padStart(3)} | ${value.ct.toString().padStart(5)} │ ${value.ref?.toString().padStart(8)} │ ${value.diff?.toString().padStart(4)} │ ${value.diff_pct?.toString().padStart(5)}% │`);
+  const keyStr = key.toString().padStart(3);
+  const countStr = value.ct.toString().padStart(5);
+  const expectedStr = value.ref?.toString().padStart(8);
+  const diffStr = value.diff?.toString().padStart(6);
+  const diffPctStr = value.diff_pct?.toString().padStart(5);
+  console.log(`│ ${keyStr} | ${countStr} │ ${expectedStr} │ ${diffStr} │ ${diffPctStr}% │`);
 }
-console.log(`└─────┴───────┴──────────┴──────┴────────┘`);
+console.log(`└─────┴───────┴──────────┴────────┴────────┘`);
 delete sessionSummary.dist
 
 console.log('\nSession Summary')
 console.log(`┌───────────────────┬──────────┐`);
 console.log(`│ Key               │ Values   │`);
 console.log(`├───────────────────┼──────────┤`);
-console.log(`│ Starting balance: │ $${startingBalance.toString().padStart(7)} │`)
-console.log(`│ Balance:          │ $${sessionSummary.balance > startingBalance ? chalk.green(sessionSummary.balance.toString().padStart(7)) : chalk.red(sessionSummary.balance.toString().padStart(7))} │`)
-console.log(`│ Roll Count:       │ ${sessionSummary.rollCount.toString().padStart(8)} │`)
-console.log(`│ Points Set:       │ ${sessionSummary.pointsSet.toString().padStart(8)} │`)
-console.log(`│ Points Won:       │ ${sessionSummary.pointsWon.toString().padStart(8)} │`)
-console.log(`│ Come Out Wins:    │ ${sessionSummary.comeOutWins.toString().padStart(8)} │`)
-console.log(`│ Come Out Losses:  │ ${sessionSummary.comeOutLosses.toString().padStart(8)} │`)
-console.log(`│ Net Come Out Wins:│ ${sessionSummary.netComeOutWins.toString().padStart(8)} │`)
-console.log(`│ Neutrals:         │ ${sessionSummary.neutrals.toString().padStart(8)} │`)
-console.log(`│ Hand Count:       │ ${sessionSummary.handCount.toString().padStart(8)} │`)
+console.log(`│ Starting balance: │ $${psCt(startingBalance, 7)} │`)
+let balanceStr = sessionSummary.balance > startingBalance ? chalk.green(psCt(sessionSummary.balance, 7)) : chalk.red(psCt(sessionSummary.balance, 7))
+console.log(`│ Balance:          │ $${balanceStr} │`)
+console.log(`│ Roll Count:       │ ${psCt(sessionSummary.rollCount, 8)} │`)
+console.log(`│ Points Set:       │ ${psCt(sessionSummary.pointsSet, 8)} │`)
+console.log(`│ Points Won:       │ ${psCt(sessionSummary.pointsWon, 8)} │`)
+console.log(`│ Come Out Wins:    │ ${psCt(sessionSummary.comeOutWins, 8)} │`)
+console.log(`│ Come Out Losses:  │ ${psCt(sessionSummary.comeOutLosses, 8)} │`)
+console.log(`│ Net Come Out Wins:│ ${psCt(sessionSummary.netComeOutWins, 8)} │`)
+console.log(`│ Neutrals:         │ ${psCt(sessionSummary.neutrals, 8)} │`)
+console.log(`│ Hand Count:       │ ${psCt(sessionSummary.handCount, 8)} │`)
 console.log(`└───────────────────┴──────────┘`);
 
-if (showDetail === '1' || showDetail === 'true') {
+if (showDetail) {
   const pr = (s: string): string => s.padEnd(19);
   const pd = (s: string): string => s.padStart(6);
 
 
   let row = 0
   let handCount = 0
-  while (row <= hands.length / 5 && handCount < hands.length) {
+  const handsPerRow = 15
+  while (row <= hands.length / handsPerRow && handCount < hands.length) {
     let handsSummary = []
     //───────┬───────┬───────┬───────┬───────┐
     //───────┴───────┴───────┴───────┴───────┘
@@ -228,7 +262,7 @@ if (showDetail === '1' || showDetail === 'true') {
     handsSummary.push('│ ' + pr('Net Come Out Wins:'));
     handsSummary.push('│ ' + pr('Neutrals:'));
     handsSummary.push('└─────────────────────');
-    for (let i = 0; i < 5 && handCount < hands.length; i++) {
+    for (let i = 0; i < handsPerRow && handCount < hands.length; i++) {
       const hand = hands[handCount++]
       delete hand.summary.dist
       handsSummary[0] += '┬───────'
@@ -255,36 +289,23 @@ if (showDetail === '1' || showDetail === 'true') {
     handsSummary[9] += ' │'
     handsSummary[10] += '┘'
 
-    for (let i = 0; i < 11; i++) {
+    for (let i = 0; i < handsSummary.length; i++) {
       console.log(handsSummary[i])
     }
     row += 1
   }
-
-  // hands.forEach((hand, index) => {
-  //   delete hand.summary.dist
-  //   console.log(`\nHand ${index + 1}:`)
-  //   console.log(`  Balance: $${hand.summary.balance}`)
-  //   console.log(`  Roll Count: ${hand.summary.rollCount}`)
-  //   console.log(`  Points Set: ${hand.summary.pointsSet}`)
-  //   console.log(`  Points Won: ${hand.summary.pointsWon}`)
-  //   console.log(`  Come Out Wins: ${hand.summary.comeOutWins}`)
-  //   console.log(`  Come Out Losses: ${hand.summary.comeOutLosses}`)
-  //   console.log(`  Net Come Out Wins: ${hand.summary.netComeOutWins}`)
-  //   console.log(`  Neutrals: ${hand.summary.neutrals}`)
-  // })
 }
 
-if (showDetail === '55' || showDetail === '5s') {
-  console.log('\nDetailed Hand History:');
-  hands.forEach((hand, handIndex) => {
-    console.log(`\nHand ${handIndex + 1} History:`);
-    hand.history.forEach((roll: Result, rollIndex: number) => {
-      console.log(`  Roll ${rollIndex + 1}:`);
-      console.log(`    Dice: ${roll.die1} + ${roll.die2} = ${roll.diceSum}`);
-      console.log(`    Result: ${roll.result}`);
-      console.log(`    Point: ${roll.point}`);
-      console.log(`    Come Out: ${roll.isComeOut}`);
-    });
-  });
-}
+// if (showDetail) {
+//   console.log('\nDetailed Hand History:');
+//   hands.forEach((hand, handIndex) => {
+//     console.log(`\nHand ${handIndex + 1} History:`);
+//     hand.history.forEach((roll: Result, rollIndex: number) => {
+//       console.log(`  Roll ${rollIndex + 1}:`);
+//       console.log(`    Dice: ${roll.die1} + ${roll.die2} = ${roll.diceSum}`);
+//       console.log(`    Result: ${roll.result}`);
+//       console.log(`    Point: ${roll.point}`);
+//       console.log(`    Come Out: ${roll.isComeOut}`);
+//     });
+//   });
+// }
