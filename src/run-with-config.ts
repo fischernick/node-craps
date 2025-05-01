@@ -20,16 +20,28 @@ function runHandsWithConfig(config: HandsConfig): void {
     // Build the command line arguments
     const args = [
         '--loader', 'ts-node/esm',
-        'src/hands.ts',
-        config.numHands?.toString() || '10',
-        config.showDetail ? 'true' : 'false',
-        config.startingBalance?.toString() || '5000',
-        config.bettingStrategy || 'dontComeWithPlaceBets',
-        config.handsFile || ''
+        'src/hands.ts'
     ];
 
-    // Filter out empty strings
-    const filteredArgs = args.filter(arg => arg !== '');
+    // Add named arguments based on config
+    if (config.numHands) {
+        args.push('-n', config.numHands.toString());
+    }
+    if (config.showDetail) {
+        args.push('-d');
+    }
+    if (config.startingBalance) {
+        args.push('-b', config.startingBalance.toString());
+    }
+    if (config.bettingStrategy) {
+        args.push('-s', config.bettingStrategy);
+    }
+    if (config.handsFile) {
+        args.push('-f', config.handsFile);
+    }
+    if (config.displayTables) {
+        args.push('-t');
+    }
 
     console.log('Running hands.ts with the following configuration:');
     console.log(`- Number of hands: ${config.numHands || 10}`);
@@ -37,9 +49,10 @@ function runHandsWithConfig(config: HandsConfig): void {
     console.log(`- Starting balance: $${config.startingBalance || 5000}`);
     console.log(`- Betting strategy: ${config.bettingStrategy || 'dontComeWithPlaceBets'}`);
     console.log(`- Hands file: ${config.handsFile || 'None'}`);
+    console.log(`- Display tables: ${config.displayTables || false}`);
 
     // Spawn the process
-    const handsProcess = spawn('node', filteredArgs, { stdio: 'inherit' });
+    const handsProcess = spawn('node', args, { stdio: 'inherit' });
 
     // Handle process events
     handsProcess.on('error', (err) => {

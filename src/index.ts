@@ -55,7 +55,11 @@ export function shoot(before: Result, dice: DieResult[]): Result {
 
 export type BettingStrategy = (param1: HandOptions) => BetDictionary
 
-export function playHand(rules: any, bettingStrategy: BettingStrategy, roll = rollD6): any {
+export type RollOptions = {
+  displayTables?: boolean
+}
+
+export function playHand(rules: any, bettingStrategy: BettingStrategy, roll = rollD6, opts: RollOptions = { displayTables: false }): any {
   const history = []
   let balance = 0
 
@@ -77,7 +81,7 @@ export function playHand(rules: any, bettingStrategy: BettingStrategy, roll = ro
     if (process.env.DEBUG && bets.newBetSum) console.log(`[bet] new bet $${bets.newBetSum} ($${balance})`)
     bets.newBetSum = 0
 
-    // displayTable(true, bets, hand.point, balance, hand);
+    if (opts.displayTables) displayTable(true, bets, hand.point, balance, hand);
 
 
     hand = shoot(
@@ -89,9 +93,16 @@ export function playHand(rules: any, bettingStrategy: BettingStrategy, roll = ro
     if (process.env.DEBUG) console.log(`[roll] ${hand.result} (${hand.diceSum})`)
 
     var newPayouts: Payout[] | undefined = [];
-    ({ bets, newPayouts } = settleAllBets(bets, hand, rules));
+    var actions: string[] | undefined = [];
+    ({ bets, newPayouts, actions } = settleAllBets(bets, hand, rules));
 
-    //displayTable(false, bets, hand.point, balance, hand, newPayouts);
+    if (opts.displayTables) {
+      actions?.forEach(action => {
+        console.log(" " + action)
+      });
+    }
+
+    if (opts.displayTables) displayTable(false, bets, hand.point, balance, hand, newPayouts);
 
     if (bets?.payoutSum) {
       balance += bets.payoutSum.total

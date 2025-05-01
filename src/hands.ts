@@ -11,6 +11,7 @@ export type HandsConfig = {
   startingBalance: number;
   bettingStrategy: 'dontComeWithPlaceBets' | 'minPassLineMaxOdds' | 'minPassLineOnly';
   handsFile?: string;
+  displayTables?: boolean;
 };
 
 // Default configuration values
@@ -19,7 +20,8 @@ const defaultConfig: HandsConfig = {
   showDetail: false,
   startingBalance: 5000,
   bettingStrategy: 'dontComeWithPlaceBets',
-  handsFile: undefined
+  handsFile: undefined,
+  displayTables: false
 };
 
 // Parse command line arguments or load from config file
@@ -27,33 +29,77 @@ const parseArgs = (): HandsConfig => {
   const args = process.argv.slice(2);
   const config: HandsConfig = { ...defaultConfig };
 
-  if (args.length > 0) {
-    const numHandsArg = parseInt(args[0], 10);
-    if (!isNaN(numHandsArg)) {
-      config.numHands = numHandsArg;
+  // Parse named arguments
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    const nextArg = args[i + 1];
+
+    switch (arg) {
+      case '-n':
+      case '--num-hands':
+        if (nextArg) {
+          const numHandsArg = parseInt(nextArg, 10);
+          if (!isNaN(numHandsArg)) {
+            config.numHands = numHandsArg;
+          }
+        }
+        i++;
+        break;
+
+      case '-d':
+      case '--show-detail':
+        config.showDetail = true;
+        break;
+
+      case '-b':
+      case '--balance':
+        if (nextArg) {
+          const startingBalanceArg = parseInt(nextArg, 10);
+          if (!isNaN(startingBalanceArg)) {
+            config.startingBalance = startingBalanceArg;
+          }
+        }
+        i++;
+        break;
+
+      case '-s':
+      case '--strategy':
+        if (nextArg && ['dontComeWithPlaceBets', 'minPassLineMaxOdds', 'minPassLineOnly'].includes(nextArg)) {
+          config.bettingStrategy = nextArg as HandsConfig['bettingStrategy'];
+        }
+        i++;
+        break;
+
+      case '-f':
+      case '--file':
+        if (nextArg) {
+          config.handsFile = nextArg;
+        }
+        i++;
+        break;
+
+      case '-t':
+      case '--tables':
+        config.displayTables = true;
+        break;
+
+      case '-h':
+      case '--help':
+        console.log(`
+Usage: node --loader ts-node/esm src/hands.ts [options]
+
+Options:
+  -n, --num-hands <number>    Number of hands to simulate (default: 10)
+  -d, --show-detail          Show detailed hand information
+  -b, --balance <number>     Starting balance (default: 5000)
+  -s, --strategy <name>      Betting strategy: dontComeWithPlaceBets, minPassLineMaxOdds, minPassLineOnly
+  -f, --file <path>          Path to hands file
+  -t, --tables               Display tables
+  -h, --help                 Show this help message
+        `);
+        process.exit(0);
+        break;
     }
-  }
-
-  if (args.length > 1) {
-    config.showDetail = args[1] === 'true' || args[1] === '1';
-  }
-
-
-
-  if (args.length > 2) {
-    const startingBalanceArg = parseInt(args[3], 10);
-    if (!isNaN(startingBalanceArg)) {
-      config.startingBalance = startingBalanceArg;
-    }
-  }
-
-  if (args.length > 3) {
-    if (['dontComeWithPlaceBets', 'minPassLineMaxOdds', 'minPassLineOnly'].includes(args[4])) {
-      config.bettingStrategy = args[4] as HandsConfig['bettingStrategy'];
-    }
-  }
-  if (args.length > 4) {
-    config.handsFile = args[2];
   }
 
   return config;
@@ -69,7 +115,7 @@ console.log(`handsFile: ${config.handsFile}`);
 
 console.log(`Simulating ${numHands} Craps Hand(s)`);
 console.log(`Using betting strategy: ${bettingStrategy}`);
-console.log(`Show detail: ${showDetail}`);
+console.log(`Show detail: ${showDetail} // displayTables: ${config.displayTables}`);
 console.log(`Starting balance: $${startingBalance}`);
 
 
@@ -138,9 +184,9 @@ for (let i = 0; i < numHands; i++) {
     history: Result[]
   }
   if (rolls.length > 0) {
-    hand = playHand(rules, dontComeWithPlaceBets, roller)
+    hand = playHand(rules, dontComeWithPlaceBets, roller, { displayTables: config.displayTables })
   } else {
-    hand = playHand(rules, dontComeWithPlaceBets)
+    hand = playHand(rules, dontComeWithPlaceBets, rollD6, { displayTables: config.displayTables })
   }
   hand.summary = new Summary()
 
