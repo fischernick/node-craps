@@ -1,8 +1,8 @@
 import chalk from 'chalk'
 import { settleAllBets } from './settle.js'
-import { HandResult, type Result, Point, diceResultAsPoint, DieResult, DiceResult, BetPoint, Payout, BettingStrategy, BettingStrategyName } from "./consts.js"
+import { HandResult, type Result, Point, diceResultAsPoint, DieResult, DiceResult, BetPoint, Payout } from "./consts.js"
 import { BetDictionary } from "./bets.js"
-import { getBettingStrategy } from "./betting.js"
+import { BettingStrategyName, getBettingStrategy } from "./betting.js"
 
 export function rollD6(): number {
   return 1 + Math.floor(Math.random() * 6)
