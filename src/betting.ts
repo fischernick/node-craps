@@ -49,24 +49,33 @@ export function dontComeWithPlaceBets(opts: HandOptions): BetDictionary {
   // 18 6&8
   // dc 60
   const { rules, hand, bets } = opts
+  let theseBets = bets ?? new BetDictionary()
+
+  // is there any pointed/numbered don't come bet
+  const dontComePointedBet: boolean = !(!DontComeBetPoints.find(bet => theseBets?.getBet(bet)))
+
+  // is there a dont come bet
+  let dontComeBet: boolean = !(!theseBets?.getBet(BetPoint.DontCome))
+
+  // if the hand is not a come out, we need to add a dont come bet
   if (!hand.isComeOut) {
     // check all the dont come point bets for an existing dont come bet
-    const dontComeBet = DontComeBetPoints.find(bet => bets?.getBet(bet))
-    let theseBets = bets ?? new BetDictionary()
 
-    if (!dontComeBet && !theseBets.notes.dontCome) {
+    if (!dontComePointedBet && !theseBets.notes.dontCome) {
     // no dont come bet, add one
       theseBets.addBet(BetPoint.DontCome, 60)
       theseBets.notes.dontCome = "set"
-
-
-      // if there is not a dont come bet on the same number, add the place bet
-      if (!bets?.getBet(BetPoint.DontComePoint5) && !bets?.getBet(BetPoint.Place5)) theseBets.addBet(BetPoint.Place5, 15)
-      if (!bets?.getBet(BetPoint.DontComePoint6) && !bets?.getBet(BetPoint.Place6)) theseBets.addBet(BetPoint.Place6, 18)
-      if (!bets?.getBet(BetPoint.DontComePoint8) && !bets?.getBet(BetPoint.Place8)) theseBets.addBet(BetPoint.Place8, 18)
-      if (!bets?.getBet(BetPoint.DontComePoint9) && !bets?.getBet(BetPoint.Place9)) theseBets.addBet(BetPoint.Place9, 15)
+      dontComeBet = true
     }
-    return theseBets
   }
-  return bets ? bets : new BetDictionary()
+
+  if (dontComePointedBet || dontComeBet) {
+    // if there is not a dont come bet on the same number, add the place bet
+    if (!bets?.getBet(BetPoint.DontComePoint5) && !bets?.getBet(BetPoint.Place5)) theseBets.addBet(BetPoint.Place5, 15)
+    if (!bets?.getBet(BetPoint.DontComePoint6) && !bets?.getBet(BetPoint.Place6)) theseBets.addBet(BetPoint.Place6, 18)
+    if (!bets?.getBet(BetPoint.DontComePoint8) && !bets?.getBet(BetPoint.Place8)) theseBets.addBet(BetPoint.Place8, 18)
+    if (!bets?.getBet(BetPoint.DontComePoint9) && !bets?.getBet(BetPoint.Place9)) theseBets.addBet(BetPoint.Place9, 15)
+  }
+  return theseBets
 }
+
