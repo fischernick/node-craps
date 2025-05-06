@@ -62,6 +62,10 @@ export class BetDictionary {
         if (amount === 0) {
             return;
         }
+        if (this.getBet(betPoint)) {
+            console.error(`addBet: ${BetPoint[betPoint].toString()} already set`);
+            this.notes.errors += `addBet: ${BetPoint[betPoint].toString()} already set\n`;
+        }
         this[betPoint] = { amount, isContract: false, set: true };
         this.newBetSum += amount;
     }

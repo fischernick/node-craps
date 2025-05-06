@@ -1,8 +1,8 @@
 {
-    "numHands": 5,
+    "numHands": 2,
     "showDetail": true,
     "startingBalance": 10000,
     "bettingStrategy": "dontComeWithPlaceBets",
-    "handsFile": "/home/haldol/code/node-craps/rollerset.1.json",
+    "handsFile": "/home/haldol/code/node-craps/resetPlaceWOPoint.json",
     "displayTables": true
 }

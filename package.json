@@ -15,7 +15,8 @@
     "start": "node dist/hands.js",
     "dev": "node --loader ts-node/esm src/hands.ts",
     "devKnownRollSet": "node --loader ts-node/esm src/hands.ts",
-    "run-with-config": "node --loader ts-node/esm src/run-with-config.ts"
+    "run-with-config": "node --loader ts-node/esm src/run-with-config.ts",
+    "npx-with-config": "npx tsx src/run-with-config.ts"
   },
   "repository": {
     "type": "git",
@@ -43,6 +44,7 @@
     "tap": "^21.1.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   },
   "dependencies": {

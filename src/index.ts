@@ -130,7 +130,7 @@ export function buildHeaderLine(point: Point): string {
   return headerLine;
 }
 
-export function dcbets(bets: BetDictionary): string {
+export function dontComeBetsLine(bets: BetDictionary): string {
   let tots = "";
   //const pointValues = [Point.FOUR, Point.FIVE, Point.SIX, Point.EIGHT, Point.NINE, Point.TEN];
   const dcPoints = [
@@ -154,7 +154,7 @@ export function dcbets(bets: BetDictionary): string {
   return tots;
 }
 
-export function pbets(bets: BetDictionary): string {
+export function placeBetsLine(bets: BetDictionary): string {
   let tots = `      ┃`;
   //const pointValues = [Point.FOUR, Point.FIVE, Point.SIX, Point.EIGHT, Point.NINE, Point.TEN];
   const dcPoints = [
@@ -198,10 +198,11 @@ function displayTable(preRoll: boolean, bets: BetDictionary, point: Point, balan
     balanceLine += ` + ${payoutColor(`${payoutSum}`)} = ${sumColor(`${balance + payoutSum}`)}`;
   }
 
+  const tableHeight = 7;
   let rollLine = preRoll ? '' : `Roll: ${result?.die1}+${result?.die2}> ${result?.diceSum} => ${result?.result}`;
   let payoutLine: string[] = [];
   if (newPayouts && newPayouts.length > 0) {
-    if (newPayouts.length <= 7) {
+    if (newPayouts.length <= tableHeight) {
       payoutLine = newPayouts.map(p => `${p.type}: ${p.principal} + ${p.profit} = ${p.principal + p.profit}`);
     } else {
       const reducedPayouts = newPayouts.reduce((acc, p) => {
@@ -227,9 +228,9 @@ function displayTable(preRoll: boolean, bets: BetDictionary, point: Point, balan
   table += (preRoll ? '    EXISTING BETS  BEFORE ROLL ' : '    ROLL RESULTS AND BETS SETTLED') + '\n';
   table += `┏━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┓\n`;
   table += `┃  ┃` + buildHeaderLine(point) + `    ${rollLine}\n`;
-  table += `┃DC┃${dcbets(bets)} ${payoutLine[0] ? payoutLine[0] : ''}\n`;
+  table += `┃DC┃${dontComeBetsLine(bets)} ${payoutLine[0] ? payoutLine[0] : ''}\n`;
   table += `┃dO┃  n/a ┃      ┃      ┃      ┃      ┃      ┃      ┃ ${payoutLine[1] ? payoutLine[1] : ''}\n`;
-  table += `┃PB┃${pbets(bets)} ${payoutLine[2] ? payoutLine[2] : ''}\n`;
+  table += `┃PB┃${placeBetsLine(bets)} ${payoutLine[2] ? payoutLine[2] : ''}\n`;
   table += `┃ O┃      ┃      ┃      ┃      ┃      ┃      ┃      ┃ ${payoutLine[3] ? payoutLine[3] : ''}\n`;
   table += `┡━━╇━━━━━━┻━━━━━━┻━━━━━━╬━━━━━━┻━━━━━━┻━━━━━━┻━━━━━━┩ ${payoutLine[4] ? payoutLine[4] : ''}\n`;
   table += `│  ┇     Field:         ║      COME:                │ ${payoutLine[5] ? payoutLine[5] : ''}\n`;

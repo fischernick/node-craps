@@ -1,6 +1,7 @@
 {
     "numHands": 1000,
-    "showDetail": true,
+    "showDetail": false,
     "startingBalance": 10000,
-    "bettingStrategy": "dontComeWithPlaceBets"
+    "bettingStrategy": "dontComeWithPlaceBets",
+    "displayTables": false
 }
