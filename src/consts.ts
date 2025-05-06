@@ -1,3 +1,5 @@
+import { BetDictionary } from "./bets.ts";
+
 enum DieResult {
     UNDEF = -1,
     ONE = 1,
@@ -124,7 +126,6 @@ export function getPlaceBetPoint(diceSum: DiceResult): BetPoint | undefined {
             return undefined;
     }
 }
-
 
 
 type PayoutMap = Partial<Record<DiceResult, number>>;

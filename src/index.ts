@@ -1,8 +1,8 @@
 import chalk from 'chalk'
 import { settleAllBets } from './settle.js'
-import { HandOptions, minPassLineMaxOdds, minPassLineOnly } from './betting.js'
-import { HandResult, type Result, Point, diceResultAsPoint, DieResult, DiceResult, BetPoint, Payout } from "./consts.js"
+import { HandResult, type Result, Point, diceResultAsPoint, DieResult, DiceResult, BetPoint, Payout, BettingStrategy, BettingStrategyName } from "./consts.js"
 import { BetDictionary } from "./bets.js"
+import { getBettingStrategy } from "./betting.js"
 
 export function rollD6(): number {
   return 1 + Math.floor(Math.random() * 6)
@@ -53,13 +53,12 @@ export function shoot(before: Result, dice: DieResult[]): Result {
   return after
 }
 
-export type BettingStrategy = (param1: HandOptions) => BetDictionary
 
 export type RollOptions = {
   displayTables?: boolean
 }
 
-export function playHand(rules: any, bettingStrategy: BettingStrategy, roll = rollD6, opts: RollOptions = { displayTables: false }): any {
+export function playHand(rules: any, bettingStrategyName: BettingStrategyName, roll = rollD6, opts: RollOptions = { displayTables: false }): any {
   const history = []
   let balance = 0
 
@@ -73,6 +72,7 @@ export function playHand(rules: any, bettingStrategy: BettingStrategy, roll = ro
   }
 
   let bets = new BetDictionary();
+  const bettingStrategy = getBettingStrategy(bettingStrategyName);
 
   while (hand.result !== HandResult.SEVEN_OUT) {
     if (process.env.DEBUG) console.log(`[NEW HAND]`)

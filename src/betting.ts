@@ -1,8 +1,24 @@
 import { type Result, BetPoint, DontComeBetPoints, Rules } from "./consts.js";
 import { BetDictionary } from "./bets.js";
 
+export type BettingStrategy = (opts: HandOptions) => BetDictionary
+export type BettingStrategyName = 'minPassLineOnly' | 'minPassLineMaxOdds' | 'dontComeWithPlaceBets';
+
+export function getBettingStrategy(strategyName: BettingStrategyName): (opts: HandOptions) => BetDictionary {
+  switch (strategyName) {
+    case 'minPassLineOnly':
+      return minPassLineOnly;
+    case 'minPassLineMaxOdds':
+      return minPassLineMaxOdds;
+    case 'dontComeWithPlaceBets':
+      return dontComeWithPlaceBets;
+    default:
+      throw new Error(`Unknown betting strategy: ${strategyName}`);
+  }
+}
+
 export type HandOptions = {
-  rules?: Rules; 
+  rules?: Rules;
   hand: Result;
   bets?: BetDictionary;
 }

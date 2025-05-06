@@ -13,9 +13,10 @@
     "lint": "eslint \"**/*.{ts,js}\" --fix",
     "build": "tsc",
     "start": "node dist/hands.js",
-    "dev": "node --loader ts-node/esm src/hands.ts",
-    "devKnownRollSet": "node --loader ts-node/esm src/hands.ts",
-    "run-with-config": "node --loader ts-node/esm src/run-with-config.ts",
+    "dev": "npx tsx src/hands.ts",
+    "dev100": "npx tsx src/hands.ts -n 100 -s dontComeWithPlaceBets -b 10000",
+    "devKnownRollSet": "npx tsx src/hands.ts",
+    "run-with-config": "npx tsx src/run-with-config.ts",
     "npx-with-config": "npx tsx src/run-with-config.ts"
   },
   "repository": {

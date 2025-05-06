@@ -1,7 +1,7 @@
 import { playHand, rollD6 } from './index.js';
 import { minPassLineMaxOdds, dontComeWithPlaceBets } from './betting.js';
-import { HandResult, Summary, Result, distObj } from './consts.js';
-import fs from 'fs';
+import { HandResult, Summary, Result, BettingStrategyName } from './consts.js';
+import fs, { StatsFs } from 'fs';
 import chalk from 'chalk';
 
 // Configuration type for hands.ts execution
@@ -9,7 +9,7 @@ export type HandsConfig = {
   numHands: number;
   showDetail: boolean;
   startingBalance: number;
-  bettingStrategy: 'dontComeWithPlaceBets' | 'minPassLineMaxOdds' | 'minPassLineOnly';
+  bettingStrategy: BettingStrategyName;
   handsFile?: string;
   displayTables?: boolean;
 };
@@ -118,9 +118,10 @@ console.log(`Using betting strategy: ${bettingStrategy}`);
 console.log(`Show detail: ${showDetail} // displayTables: ${config.displayTables}`);
 console.log(`Starting balance: $${startingBalance}`);
 
-
+let roll: () => number = rollD6;
+let shootCount: number = 0;
+let rollCount: number = 0;
 // if the handsFile is provided and is valid json {d1: 1, d2: 2}, read the hands from the file and put them in a roll array
-let rolls: { d1: number, d2: number }[] = [];
 if (config.handsFile) {
   try {
     const fileContents = fs.readFileSync(config.handsFile, 'utf8');
@@ -130,10 +131,25 @@ if (config.handsFile) {
       typeof roll.d1 === 'number' &&
       typeof roll.d2 === 'number'
     )) {
-      rolls = parsedRolls;
+      // if the file loaded successfully, set the rolls for the roller function
       numHands = 1;
-      console.log(`[rolls] loaded ${rolls.length} rolls from ${config.handsFile}`);
-      console.log(`[rolls] ${JSON.stringify(rolls)}`);
+      roll = () => {
+        if (shootCount >= parsedRolls.length) {
+          console.log(`[roller] shootCount: ${shootCount} >= rolls.length: ${parsedRolls.length}`)
+          return rollD6();
+        }
+        if (parsedRolls.length > 0) {
+          if (rollCount % 2 === 0) {
+            rollCount++;
+            return parsedRolls[shootCount].d1;
+          }
+          rollCount++;
+          return parsedRolls[shootCount++].d2;
+        }
+        return rollD6();
+      }
+      console.log(`[rolls] loaded ${parsedRolls.length} rolls from ${config.handsFile}`);
+      console.log(`[rolls] ${JSON.stringify(parsedRolls)}`);
     } else {
       throw new Error('Invalid roll format - each roll must have d1 and d2 numbers');
     }
@@ -141,24 +157,6 @@ if (config.handsFile) {
     console.error('Error reading rolls file:', err);
     process.exit(1);
   }
-}
-
-let shootCount = 0;
-let rollCount = 0;
-const roller = (): number => {
-  if (shootCount >= rolls.length) {
-    console.log(`[roller] shootCount: ${shootCount} >= rolls.length: ${rolls.length}`)
-    return rollD6();
-  }
-  if (rolls.length > 0) {
-    if (rollCount % 2 === 0) {
-      rollCount++;
-      return rolls[shootCount].d1;
-    }
-    rollCount++;
-    return rolls[shootCount++].d2;
-  }
-  return rollD6();
 }
 
 const sessionSummary = new Summary();
@@ -183,11 +181,9 @@ for (let i = 0; i < numHands; i++) {
     balance: number,
     history: Result[]
   }
-  if (rolls.length > 0) {
-    hand = playHand(rules, dontComeWithPlaceBets, roller, { displayTables: config.displayTables })
-  } else {
-    hand = playHand(rules, dontComeWithPlaceBets, rollD6, { displayTables: config.displayTables })
-  }
+
+  hand = playHand(rules, config.bettingStrategy, roll, { displayTables: config.displayTables })
+
   hand.summary = new Summary()
 
   sessionSummary.balance += hand.balance
@@ -251,6 +247,13 @@ for (const k of sessionSummary.dist.keys()) {
   sessionSummary.dist?.set(k, dist);
 }
 
+const gor = (s: number | undefined, len: number, sfx: string = ""): string => {
+  if (s === undefined) {
+    return " ".padStart(len + sfx.length);
+  }
+  const sumColor = s > 0 ? chalk.green : chalk.red
+  return sumColor((s.toString() + sfx).padStart(len));
+}
 const psCt = (s: number, len: number) => s.toString().padStart(len)
 
 console.log('\nDice Roll Distribution')
@@ -261,9 +264,9 @@ for (const [key, value] of sessionSummary.dist.entries()) {
   const keyStr = key.toString().padStart(3);
   const countStr = value.ct.toString().padStart(5);
   const expectedStr = value.ref?.toString().padStart(8);
-  const diffStr = value.diff?.toString().padStart(6);
-  const diffPctStr = value.diff_pct?.toString().padStart(5);
-  console.log(`│ ${keyStr} | ${countStr} │ ${expectedStr} │ ${diffStr} │ ${diffPctStr}% │`);
+  const diffStr = gor(value.diff, 6);
+  const diffPctStr = gor(value.diff_pct, 6, "%");
+  console.log(`│ ${keyStr} | ${countStr} │ ${expectedStr} │ ${diffStr} │ ${diffPctStr} │`);
 }
 console.log(`└─────┴───────┴──────────┴────────┴────────┘`);
 delete sessionSummary.dist
