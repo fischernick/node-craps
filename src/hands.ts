@@ -1,7 +1,7 @@
 import { playHand, rollD6 } from './index.js';
-import { minPassLineMaxOdds, dontComeWithPlaceBets } from './betting.js';
-import { HandResult, Summary, Result, BettingStrategyName } from './consts.js';
-import fs, { StatsFs } from 'fs';
+import type { BettingStrategyName } from './betting.js';
+import { HandResult, Summary, Result } from './consts.js';
+import fs from 'fs';
 import chalk from 'chalk';
 
 // Configuration type for hands.ts execution
