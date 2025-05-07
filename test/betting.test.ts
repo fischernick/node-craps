@@ -1,10 +1,19 @@
-import { test } from 'tap'
+import { test } from "tap";
 import {
-  DiceResult, DieResult, HandResult, Point, Result,
-  BetPoint, Rules
-} from '../src/consts.js'
-import { BetDictionary } from '../src/bets.js'
-import { minPassLineOnly, minPassLineMaxOdds, dontComeWithPlaceBets } from '../src/betting.js'
+  DiceResult,
+  DieResult,
+  HandResult,
+  Point,
+  Result,
+  BetPoint,
+  Rules,
+} from "../src/consts.js";
+import { BetDictionary } from "../src/bets.js";
+import {
+  minPassLineOnly,
+  minPassLineMaxOdds,
+  dontComeWithPlaceBets,
+} from "../src/betting.js";
 
 const defaultRules: Rules = {
   minBet: 5,
@@ -16,171 +25,212 @@ const defaultRules: Rules = {
     [Point.SIX]: 5,
     [Point.EIGHT]: 5,
     [Point.NINE]: 4,
-    [Point.TEN]: 3
-  }
-}
+    [Point.TEN]: 3,
+  },
+};
 
-test('minPassLineOnly: no bets yet, coming out', function (t) {
-
-
+test("minPassLineOnly: no bets yet, coming out", function (t) {
   const hand: Result = {
     isComeOut: true,
     die1: DieResult.UNDEF,
     die2: DieResult.UNDEF,
     diceSum: DiceResult.UNDEF,
-    point: Point.OFF
-  }
+    point: Point.OFF,
+  };
 
-  const updatedBets: BetDictionary = minPassLineOnly({ rules: defaultRules, hand })
-  t.equal(updatedBets.getBet(BetPoint.Pass)?.amount, defaultRules.minBet)
-  t.equal(updatedBets.newBetSum, 5)
+  const updatedBets: BetDictionary = minPassLineOnly({
+    rules: defaultRules,
+    hand,
+  });
+  t.equal(updatedBets.getBet(BetPoint.Pass)?.amount, defaultRules.minBet);
+  t.equal(updatedBets.newBetSum, 5);
 
-  t.end()
-})
+  t.end();
+});
 
-test('minPassLineOnly: bet exists, coming out', (t) => {
-
+test("minPassLineOnly: bet exists, coming out", (t) => {
   const hand: Result = {
     isComeOut: true,
     die1: DieResult.UNDEF,
     die2: DieResult.UNDEF,
     diceSum: DiceResult.UNDEF,
-    point: Point.OFF
-  }
+    point: Point.OFF,
+  };
 
-  const bets: BetDictionary = new BetDictionary()
-  bets.addBet(BetPoint.Pass, 5)
-  bets.resetBetSum()
+  const bets: BetDictionary = new BetDictionary();
+  bets.addBet(BetPoint.Pass, 5);
+  bets.resetBetSum();
 
-  const updatedBets: BetDictionary = minPassLineOnly({ rules: defaultRules, bets, hand })
-  t.equal(updatedBets.getBet(BetPoint.Pass)?.amount, defaultRules.minBet)
-  t.notOk(updatedBets.getBet(BetPoint.Pass)?.isContract)
+  const updatedBets: BetDictionary = minPassLineOnly({
+    rules: defaultRules,
+    bets,
+    hand,
+  });
+  t.equal(updatedBets.getBet(BetPoint.Pass)?.amount, defaultRules.minBet);
+  t.notOk(updatedBets.getBet(BetPoint.Pass)?.isContract);
   // TODO: revisit logic for newBetSum
   // newBetSum is 0 because the bet was set before minPassLineOnly was called
-  t.equal(updatedBets.newBetSum, 0)
+  t.equal(updatedBets.newBetSum, 0);
 
-  t.end()
-})
+  t.end();
+});
 
-test('minPassLineOnly: bet exists, point set', (t) => {
+test("minPassLineOnly: bet exists, point set", (t) => {
   const hand: Result = {
     isComeOut: false,
     die1: DieResult.UNDEF,
     die2: DieResult.UNDEF,
     diceSum: DiceResult.UNDEF,
-    point: Point.SIX
-  }
+    point: Point.SIX,
+  };
 
-  const bets: BetDictionary = new BetDictionary()
-  bets.addBet(BetPoint.Pass, 5)
-  bets.resetBetSum()
+  const bets: BetDictionary = new BetDictionary();
+  bets.addBet(BetPoint.Pass, 5);
+  bets.resetBetSum();
 
-  const updatedBets: BetDictionary = minPassLineOnly({ rules: defaultRules, bets, hand })
-  t.equal(updatedBets.getBet(BetPoint.Pass)?.amount, defaultRules.minBet)
-  t.notOk(updatedBets.getBet(BetPoint.Pass)?.isContract)
+  const updatedBets: BetDictionary = minPassLineOnly({
+    rules: defaultRules,
+    bets,
+    hand,
+  });
+  t.equal(updatedBets.getBet(BetPoint.Pass)?.amount, defaultRules.minBet);
+  t.notOk(updatedBets.getBet(BetPoint.Pass)?.isContract);
   // TODO: revisit logic for newBetSum
   // newBetSum is 0 because the bet was set before minPassLineOnly was called
-  t.equal(updatedBets.newBetSum, 0)
+  t.equal(updatedBets.newBetSum, 0);
 
-  t.end()
-})
+  t.end();
+});
 
-test('minPassLineMaxOdds: make new bet upon establishing point', (t) => {
-
-
+test("minPassLineMaxOdds: make new bet upon establishing point", (t) => {
   const hand: Result = {
     isComeOut: false,
     die1: DieResult.UNDEF,
     die2: DieResult.UNDEF,
     diceSum: DiceResult.UNDEF,
     point: Point.FIVE,
-    result: HandResult.POINT_SET
-  }
+    result: HandResult.POINT_SET,
+  };
 
-  const bets: BetDictionary = new BetDictionary()
-  bets.addBet(BetPoint.Pass, defaultRules.minBet)
-  bets.resetBetSum()
-  const updatedBets: BetDictionary = minPassLineMaxOdds({ rules: defaultRules, bets, hand })
-  t.equal(updatedBets.getBet(BetPoint.Pass)?.amount, defaultRules.minBet, 'line bet is not changed')
-  const expectedOddsBet = defaultRules.maxOddsMultiple[Point.FIVE] * defaultRules.minBet
-  t.equal(updatedBets.getBet(BetPoint.PassOdds)?.amount, expectedOddsBet, `odds bet made properly: ${expectedOddsBet}`)
-  t.equal(updatedBets.newBetSum, updatedBets.getBet(BetPoint.PassOdds)?.amount)
+  const bets: BetDictionary = new BetDictionary();
+  bets.addBet(BetPoint.Pass, defaultRules.minBet);
+  bets.resetBetSum();
+  const updatedBets: BetDictionary = minPassLineMaxOdds({
+    rules: defaultRules,
+    bets,
+    hand,
+  });
+  t.equal(
+    updatedBets.getBet(BetPoint.Pass)?.amount,
+    defaultRules.minBet,
+    "line bet is not changed",
+  );
+  const expectedOddsBet =
+    defaultRules.maxOddsMultiple[Point.FIVE] * defaultRules.minBet;
+  t.equal(
+    updatedBets.getBet(BetPoint.PassOdds)?.amount,
+    expectedOddsBet,
+    `odds bet made properly: ${expectedOddsBet}`,
+  );
+  t.equal(updatedBets.newBetSum, updatedBets.getBet(BetPoint.PassOdds)?.amount);
 
-  t.end()
-})
+  t.end();
+});
 
-test('minPassLineMaxOdds: converge on odds bet after point set', (t) => {
-
-
+test("minPassLineMaxOdds: converge on odds bet after point set", (t) => {
   const hand: Result = {
     isComeOut: false,
     die1: DieResult.UNDEF,
     die2: DieResult.UNDEF,
     diceSum: DiceResult.EIGHT,
     point: Point.FIVE,
-    result: HandResult.NEUTRAL
-  }
+    result: HandResult.NEUTRAL,
+  };
 
-  const bets: BetDictionary = new BetDictionary()
-  bets.addBet(BetPoint.Pass, defaultRules.minBet)
-  bets.resetBetSum()
+  const bets: BetDictionary = new BetDictionary();
+  bets.addBet(BetPoint.Pass, defaultRules.minBet);
+  bets.resetBetSum();
 
-  const updatedBets: BetDictionary = minPassLineMaxOdds({ rules: defaultRules, bets, hand })
-  t.equal(updatedBets.getBet(BetPoint.Pass)?.amount, defaultRules.minBet, 'line bet is not changed')
-  t.equal(updatedBets.getBet(BetPoint.PassOdds)?.amount, defaultRules.maxOddsMultiple[Point.FIVE] * defaultRules.minBet, 'odds bet made properly')
-  t.equal(updatedBets.newBetSum, updatedBets.getBet(BetPoint.PassOdds)?.amount)
+  const updatedBets: BetDictionary = minPassLineMaxOdds({
+    rules: defaultRules,
+    bets,
+    hand,
+  });
+  t.equal(
+    updatedBets.getBet(BetPoint.Pass)?.amount,
+    defaultRules.minBet,
+    "line bet is not changed",
+  );
+  t.equal(
+    updatedBets.getBet(BetPoint.PassOdds)?.amount,
+    defaultRules.maxOddsMultiple[Point.FIVE] * defaultRules.minBet,
+    "odds bet made properly",
+  );
+  t.equal(updatedBets.newBetSum, updatedBets.getBet(BetPoint.PassOdds)?.amount);
 
-  t.end()
-})
+  t.end();
+});
 
-test('minPassLineMaxOdds: continue existing bet', (t) => {
-
-
+test("minPassLineMaxOdds: continue existing bet", (t) => {
   const hand: Result = {
     isComeOut: false,
     die1: DieResult.UNDEF,
     die2: DieResult.UNDEF,
     diceSum: DiceResult.EIGHT,
     point: Point.FIVE,
-    result: HandResult.NEUTRAL
-  }
+    result: HandResult.NEUTRAL,
+  };
 
-  const bets: BetDictionary = new BetDictionary()
-  bets.addBet(BetPoint.Pass, 5)
-  bets.addBet(BetPoint.PassOdds, 20)
-  bets.resetBetSum()
+  const bets: BetDictionary = new BetDictionary();
+  bets.addBet(BetPoint.Pass, 5);
+  bets.addBet(BetPoint.PassOdds, 20);
+  bets.resetBetSum();
 
-
-  const updatedBets: BetDictionary = minPassLineMaxOdds({ rules: defaultRules, bets, hand })
+  const updatedBets: BetDictionary = minPassLineMaxOdds({
+    rules: defaultRules,
+    bets,
+    hand,
+  });
   if (bets.getBet(BetPoint.Pass) && updatedBets.getBet(BetPoint.Pass)) {
-    t.equal(updatedBets.getBet(BetPoint.Pass)?.amount, bets.getBet(BetPoint.Pass)?.amount, 'line bet is not changed')
+    t.equal(
+      updatedBets.getBet(BetPoint.Pass)?.amount,
+      bets.getBet(BetPoint.Pass)?.amount,
+      "line bet is not changed",
+    );
   }
   if (bets.getBet(BetPoint.PassOdds) && updatedBets.getBet(BetPoint.PassOdds)) {
-    t.equal(updatedBets.getBet(BetPoint.PassOdds)?.amount, bets.getBet(BetPoint.PassOdds)?.amount, 'odds bet is not changed')
+    t.equal(
+      updatedBets.getBet(BetPoint.PassOdds)?.amount,
+      bets.getBet(BetPoint.PassOdds)?.amount,
+      "odds bet is not changed",
+    );
   }
-  t.equal(updatedBets.newBetSum, bets.newBetSum, 'no new bets were made')
+  t.equal(updatedBets.newBetSum, bets.newBetSum, "no new bets were made");
 
-  t.end()
-})
+  t.end();
+});
 
-test('dontComeWithPlaceBets: dont come bet', (t) => {
+test("dontComeWithPlaceBets: dont come bet", (t) => {
   const hand: Result = {
     isComeOut: false,
     die1: DieResult.UNDEF,
     die2: DieResult.UNDEF,
     diceSum: DiceResult.UNDEF,
-    point: Point.EIGHT
-  }
+    point: Point.EIGHT,
+  };
 
-  const bets: BetDictionary = new BetDictionary()
+  const bets: BetDictionary = new BetDictionary();
 
-  const actual: BetDictionary = dontComeWithPlaceBets({ rules: defaultRules, bets, hand })
-  t.equal(actual.getBet(BetPoint.DontCome)?.amount, 60)
-  t.equal(actual.getBet(BetPoint.Place5)?.amount, 15)
+  const actual: BetDictionary = dontComeWithPlaceBets({
+    rules: defaultRules,
+    bets,
+    hand,
+  });
+  t.equal(actual.getBet(BetPoint.DontCome)?.amount, 60);
+  t.equal(actual.getBet(BetPoint.Place5)?.amount, 15);
   // t.equal(actual.getBet(BetPoint.Place6)?.amount, 18)
   // t.equal(actual.getBet(BetPoint.Place8)?.amount, 18)
   // t.equal(actual.getBet(BetPoint.Place9)?.amount, 15)
 
-  t.end()
-})
-
+  t.end();
+});
