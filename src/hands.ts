@@ -1,5 +1,5 @@
 import { playHand, rollD6 } from './index.js';
-import type { BettingStrategyName } from './betting.js';
+import { BettingStrategy } from './betting.js';
 import { HandResult, Summary, Result } from './consts.js';
 import fs from 'fs';
 import chalk from 'chalk';
@@ -9,7 +9,7 @@ export type HandsConfig = {
   numHands: number;
   showDetail: boolean;
   startingBalance: number;
-  bettingStrategy: BettingStrategyName;
+  bettingStrategy: BettingStrategy;
   handsFile?: string;
   displayTables?: boolean;
 };
@@ -19,7 +19,7 @@ const defaultConfig: HandsConfig = {
   numHands: 10,
   showDetail: false,
   startingBalance: 5000,
-  bettingStrategy: 'dontComeWithPlaceBets',
+  bettingStrategy: BettingStrategy.DontComeWithPlaceBets,
   handsFile: undefined,
   displayTables: false
 };
@@ -64,8 +64,13 @@ const parseArgs = (): HandsConfig => {
 
       case '-s':
       case '--strategy':
-        if (nextArg && ['dontComeWithPlaceBets', 'minPassLineMaxOdds', 'minPassLineOnly'].includes(nextArg)) {
-          config.bettingStrategy = nextArg as HandsConfig['bettingStrategy'];
+        if (nextArg) {
+          if (['dontComeWithPlaceBets', 'minPassLineMaxOdds', 'minPassLineOnly'].includes(nextArg)) {
+            config.bettingStrategy = nextArg as HandsConfig['bettingStrategy'];
+          } else {
+            console.log(`Unknown betting strategy: ${nextArg}`);
+            process.exit(1);
+          }
         }
         i++;
         break;

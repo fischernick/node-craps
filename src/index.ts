@@ -1,7 +1,7 @@
 import { settleAllBets } from './settle.js'
 import { HandResult, type Result, Point, diceResultAsPoint, DieResult, DiceResult, BetPoint, Payout } from "./consts.js"
 import { BetDictionary } from "./bets.js"
-import { BettingStrategyName, getBettingStrategy } from "./betting.js"
+import { BettingStrategy, BettingStrategyName, getBettingStrategy } from "./betting.js"
 import { displayTable } from "./display.js"
 
 export function rollD6(): number {
@@ -57,7 +57,7 @@ export type RollOptions = {
   displayTables?: boolean
 }
 
-export function playHand(rules: any, bettingStrategyName: BettingStrategyName, roll = rollD6, opts: RollOptions = { displayTables: false }): any {
+export function playHand(rules: any, bettingStrategyName: BettingStrategy, roll = rollD6, opts: RollOptions = { displayTables: false }): any {
   const history = []
   let balance = 0
 

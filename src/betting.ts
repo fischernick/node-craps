@@ -1,10 +1,17 @@
 import { type Result, BetPoint, DontComeBetPoints, Rules } from "./consts.js";
 import { BetDictionary } from "./bets.js";
 
-export type BettingStrategy = (opts: HandOptions) => BetDictionary
-export type BettingStrategyName = 'minPassLineOnly' | 'minPassLineMaxOdds' | 'dontComeWithPlaceBets';
+export type BettingStrategyFunc = (opts: HandOptions) => BetDictionary
 
-export function getBettingStrategy(strategyName: BettingStrategyName): (opts: HandOptions) => BetDictionary {
+export enum BettingStrategy {
+  MinPassLineOnly = 'minPassLineOnly',
+  MinPassLineMaxOdds = 'minPassLineMaxOdds',
+  DontComeWithPlaceBets = 'dontComeWithPlaceBets',
+}
+
+export type BettingStrategyName = `${BettingStrategy}`;
+
+export function getBettingStrategy(strategyName: BettingStrategy): BettingStrategyFunc {
   switch (strategyName) {
     case 'minPassLineOnly':
       return minPassLineOnly;
