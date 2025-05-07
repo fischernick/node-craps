@@ -10,9 +10,8 @@ export function buildHeaderLine(point: Point): string {
 
     points.forEach((p, i) => {
         const isPoint = point === pointValues[i] || (i === 0 && point === Point.UNDEF);
-        // "      "
-        const prePad = (p === 'DC' || p === '10') ? ' ' : '  ';
-        headerLine += isPoint ? `${prePad}${chalk.yellowBright("*")}${p}  ┃` : `${prePad} ${p}  ┃`;
+        const pointText = p.padStart(2, ' ');
+        headerLine += isPoint ? ` ${chalk.yellowBright("*")}${pointText}  ┃` : `  ${pointText}  ┃`;
     });
 
     return headerLine;
@@ -29,20 +28,17 @@ export function dontComeBetsLine(bets: BetDictionary): string {
         BetPoint.DontComePoint9,
         BetPoint.DontComePoint10
     ];
-    dcPoints.forEach((p, i) => {
-        const bet = bets.getBet(p);
-        if (bet) {
-            tots += ` ${chalk.inverse(bet.amount.toString().padStart(4, ' '))} ┃`;
-        } else {
-            tots += `      ┃`;
-        }
-    });
+
+    tots += dcPoints.reduce((acc, p) => {
+        const betString: string = bets.getBet(p) ? `${chalk.inverse(bets.getBet(p)?.amount.toString().padStart(5))}` : "".padStart(5);
+        return acc + `${betString} ┃`;
+    }, "");
     return tots;
 }
 
 export function placeBetsLine(bets: BetDictionary): string {
     let tots = `      ┃`;
-    const dcPoints = [
+    const placeBetPoints = [
         BetPoint.Place4,
         BetPoint.Place5,
         BetPoint.Place6,
@@ -50,14 +46,11 @@ export function placeBetsLine(bets: BetDictionary): string {
         BetPoint.Place9,
         BetPoint.Place10
     ];
-    dcPoints.forEach((p, i) => {
+    tots += placeBetPoints.reduce((acc, p) => {
         const bet = bets.getBet(p);
-        if (bet) {
-            tots += ` ${chalk.green(bet.amount.toString().padStart(4, ' '))} ┃`;
-        } else {
-            tots += `      ┃`;
-        }
-    });
+        const amount: string = bet?.amount.toString() ?? "";
+        return acc + `${chalk.green(amount.padStart(5, ' '))} ┃`;
+    }, "");
     return tots;
 }
 

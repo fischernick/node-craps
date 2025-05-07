@@ -19,6 +19,7 @@ export function passLine(bets: BetDictionary, hand: Result, rules: Rules): Settl
 
   if (!betHasPayoutAction) return { bets } // keep bets intact if no action
 
+  let passLineBet = bets.getBet(BetPoint.Pass)
   bets.clearBet(BetPoint.Pass) // clear pass line bet on action
   let actions: string[] = ['clear pass line bet']
 
@@ -26,8 +27,8 @@ export function passLine(bets: BetDictionary, hand: Result, rules: Rules): Settl
 
   const payout: Payout = {
     type: hand.result ?? HandResult.NEUTRAL,
-    principal: bets.getBet(BetPoint.Pass)?.amount ?? 0,
-    profit: (bets.getBet(BetPoint.Pass)?.amount ?? 0) * 1
+    principal: passLineBet?.amount ?? 0,
+    profit: (passLineBet?.amount ?? 0) * 1
   }
   actions.push(`payout ${payout.principal}+${payout.profit}`)
 

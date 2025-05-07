@@ -1,4 +1,3 @@
-import chalk from 'chalk'
 import { settleAllBets } from './settle.js'
 import { HandResult, type Result, Point, diceResultAsPoint, DieResult, DiceResult, BetPoint, Payout } from "./consts.js"
 import { BetDictionary } from "./bets.js"
