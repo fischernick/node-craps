@@ -1,4 +1,4 @@
-enum DieResult {
+export enum DieResult {
   UNDEF = -1,
   ONE = 1,
   TWO = 2,
@@ -8,7 +8,7 @@ enum DieResult {
   SIX = 6,
 }
 
-enum DiceResult {
+export enum DiceResult {
   UNDEF = -1,
   TWO = 2,
   THREE = 3,
@@ -23,7 +23,7 @@ enum DiceResult {
   TWELVE = 12,
 }
 
-enum Point {
+export enum Point {
   UNDEF = -1,
   OFF = 0,
   FOUR = 4,
@@ -34,7 +34,7 @@ enum Point {
   TEN = 10,
 }
 
-export function diceResultAsPoint(diceResult: DiceResult) {
+export function diceResultAsPoint(diceResult: DiceResult): Point {
   switch (diceResult) {
     case DiceResult.FOUR:
       return Point.FOUR;
@@ -53,7 +53,7 @@ export function diceResultAsPoint(diceResult: DiceResult) {
   }
 }
 
-type Result = {
+export type Result = {
   die1: DieResult;
   die2: DieResult;
   diceSum: DiceResult;
@@ -64,12 +64,12 @@ type Result = {
 /**
  * Represents a payout for a bet
  */
-type Payout = {
+export type Payout = {
   type: HandResult | string;
   principal: number;
   profit: number;
 };
-enum HandResult {
+export enum HandResult {
   NEW_GAME = "new game",
   COMEOUT_LOSS = "comeout loss",
   COMEOUT_WIN = "comeout win",
@@ -79,7 +79,7 @@ enum HandResult {
   SEVEN_OUT = "seven out",
 }
 
-enum BetPoint {
+export enum BetPoint {
   Pass = 0,
   PassOdds = 1,
   Come = 2,
@@ -102,7 +102,7 @@ enum BetPoint {
   DontComePoint10 = 19,
 }
 
-const DontComeBetPoints = [
+export const DontComeBetPoints = [
   BetPoint.DontComePoint4,
   BetPoint.DontComePoint5,
   BetPoint.DontComePoint6,
@@ -110,7 +110,7 @@ const DontComeBetPoints = [
   BetPoint.DontComePoint9,
   BetPoint.DontComePoint10,
 ];
-const PlaceBetPoints = [
+export const PlaceBetPoints = [
   BetPoint.Place4,
   BetPoint.Place5,
   BetPoint.Place6,
@@ -139,9 +139,9 @@ export function getPlaceBetPoint(diceSum: DiceResult): BetPoint | undefined {
   }
 }
 
-type PayoutMap = Partial<Record<DiceResult, number>>;
+export type PayoutMap = Partial<Record<DiceResult, number>>;
 
-const passOddsPayouts: PayoutMap = {
+export const passOddsPayouts: PayoutMap = {
   [DiceResult.FOUR]: 2,
   [DiceResult.FIVE]: 3 / 2,
   [DiceResult.SIX]: 6 / 5,
@@ -150,7 +150,7 @@ const passOddsPayouts: PayoutMap = {
   [DiceResult.TEN]: 2,
 };
 
-const passPayouts: PayoutMap = {
+export const passPayouts: PayoutMap = {
   [DiceResult.FOUR]: 1,
   [DiceResult.FIVE]: 1,
   [DiceResult.SIX]: 1,
@@ -159,7 +159,7 @@ const passPayouts: PayoutMap = {
   [DiceResult.TEN]: 1,
 };
 
-const dontComePayouts: PayoutMap = {
+export const dontComePayouts: PayoutMap = {
   [DiceResult.TWO]: 1,
   [DiceResult.THREE]: 1,
   [DiceResult.SEVEN]: 1,
@@ -172,7 +172,7 @@ const dontComePayouts: PayoutMap = {
   [DiceResult.TEN]: 1,
 };
 
-const dontComeOddsPayouts: PayoutMap = {
+export const dontComeOddsPayouts: PayoutMap = {
   [DiceResult.FOUR]: 2,
   [DiceResult.FIVE]: 3 / 2,
   [DiceResult.SIX]: 6 / 5,
@@ -181,7 +181,7 @@ const dontComeOddsPayouts: PayoutMap = {
   [DiceResult.TEN]: 2,
 };
 
-const placePayouts: PayoutMap = {
+export const placePayouts: PayoutMap = {
   [DiceResult.FOUR]: 9 / 5,
   [DiceResult.FIVE]: 7 / 5,
   [DiceResult.SIX]: 7 / 6,
@@ -190,7 +190,7 @@ const placePayouts: PayoutMap = {
   [DiceResult.TEN]: 9 / 5,
 };
 
-const BetPointPayouts: Partial<Record<BetPoint, PayoutMap>> = {
+export const BetPointPayouts: Partial<Record<BetPoint, PayoutMap>> = {
   [BetPoint.Pass]: passPayouts,
   [BetPoint.PassOdds]: passOddsPayouts,
   //[BetPoint.Come]: passOddsPayouts,
@@ -207,12 +207,12 @@ const BetPointPayouts: Partial<Record<BetPoint, PayoutMap>> = {
   [BetPoint.Place10]: placePayouts,
 };
 
-interface Rules {
+export interface Rules {
   minBet: number;
   maxOddsMultiple: Record<Point, number>;
 }
 
-class Summary {
+export class Summary {
   principal: number = 0;
   profit: number = 0;
   balance: number;
@@ -253,7 +253,7 @@ class Summary {
   }
 }
 
-class distObj {
+export class distObj {
   ct: number;
   prob: number;
   ref?: number;
@@ -265,19 +265,3 @@ class distObj {
     this.prob = probability;
   }
 }
-
-export {
-  HandResult,
-  DiceResult,
-  BetPoint,
-  Result,
-  BetPointPayouts,
-  Point,
-  DieResult,
-  distObj,
-  Rules,
-  DontComeBetPoints,
-  PlaceBetPoints,
-  Summary,
-  Payout,
-};
