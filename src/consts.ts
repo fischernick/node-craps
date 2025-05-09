@@ -61,6 +61,7 @@ export type Result = {
   isComeOut?: boolean;
   point: Point;
 };
+
 /**
  * Represents a payout for a bet
  */
@@ -69,6 +70,7 @@ export type Payout = {
   principal: number;
   profit: number;
 };
+
 export enum HandResult {
   NEW_GAME = "new game",
   COMEOUT_LOSS = "comeout loss",
@@ -110,6 +112,7 @@ export const DontComeBetPoints = [
   BetPoint.DontComePoint9,
   BetPoint.DontComePoint10,
 ];
+
 export const PlaceBetPoints = [
   BetPoint.Place4,
   BetPoint.Place5,

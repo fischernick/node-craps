@@ -1,4 +1,4 @@
-import { BetPoint, Summary, Point } from "./consts.js";
+import { BetPoint, Summary, Point, DontComeBetPoints } from "./consts.js";
 
 export type Bet = {
     amount: number;
@@ -73,6 +73,11 @@ export class BetDictionary {
      * @param amount The amount of the bet
      */
     moveDCBet(betPoint: BetPoint): void {
+
+        if (!DontComeBetPoints.includes(betPoint)) {
+            console.error(`moveDCBet: ${BetPoint[betPoint].toString()} is not a dont come bet`);
+            return;
+        }
         const bp = this[BetPoint.DontCome];
         if (bp.amount === 0) {
             return;

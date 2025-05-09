@@ -1,5 +1,5 @@
 import { beforeEach, test } from "tap";
-import { BetPoint } from "../src/consts.js";
+import { BetPoint, DiceResult } from "../src/consts.js";
 import { BetDictionary } from "../src/bets.js";
 
 // Tests
@@ -82,3 +82,44 @@ test("setContract handles multiple bet points", (t) => {
   t.equal(bets[BetPoint.Come].isContract, true);
   t.end();
 });
+test("moveDCBet moves dont come bet to point", (t) => {
+  bets.addBet(BetPoint.DontCome, 100);
+  bets.moveDCBet(BetPoint.DontComePoint4);
+  t.equal(bets[BetPoint.DontCome].amount, 0);
+  t.equal(bets[BetPoint.DontComePoint4].amount, 100);
+  t.equal(bets[BetPoint.DontComePoint4].set, true);
+  t.equal(bets[BetPoint.DontComePoint4].isContract, true);
+
+  t.end();
+});
+
+test("moveDCBet handles all valid point numbers", (t) => {
+  const testPoints = [
+    { roll: DiceResult.FOUR, point: BetPoint.DontComePoint4 },
+    { roll: DiceResult.FIVE, point: BetPoint.DontComePoint5 },
+    { roll: DiceResult.SIX, point: BetPoint.DontComePoint6 },
+    { roll: DiceResult.EIGHT, point: BetPoint.DontComePoint8 },
+    { roll: DiceResult.NINE, point: BetPoint.DontComePoint9 },
+    { roll: DiceResult.TEN, point: BetPoint.DontComePoint10 }
+  ];
+
+  testPoints.forEach(({ roll, point }) => {
+    bets.addBet(BetPoint.DontCome, 100);
+    bets.moveDCBet(point);
+    t.equal(bets[BetPoint.DontCome].amount, 0);
+    t.equal(bets[point].amount, 100);
+    t.equal(bets[point].set, true);
+    // bets moved to dc points are contracts
+    t.equal(bets[point].isContract, true);
+    bets.clearAllBets();
+  });
+  t.end();
+});
+
+test("moveDCBet does nothing for invalid point numbers", (t) => {
+  bets.addBet(BetPoint.DontCome, 100);
+  bets.moveDCBet(BetPoint.Come);
+  t.equal(bets[BetPoint.DontCome].amount, 100);
+  t.end();
+});
+
