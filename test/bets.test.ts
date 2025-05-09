@@ -95,15 +95,15 @@ test("moveDCBet moves dont come bet to point", (t) => {
 
 test("moveDCBet handles all valid point numbers", (t) => {
   const testPoints = [
-    { roll: DiceResult.FOUR, point: BetPoint.DontComePoint4 },
-    { roll: DiceResult.FIVE, point: BetPoint.DontComePoint5 },
-    { roll: DiceResult.SIX, point: BetPoint.DontComePoint6 },
-    { roll: DiceResult.EIGHT, point: BetPoint.DontComePoint8 },
-    { roll: DiceResult.NINE, point: BetPoint.DontComePoint9 },
-    { roll: DiceResult.TEN, point: BetPoint.DontComePoint10 }
+    { point: BetPoint.DontComePoint4 },
+    { point: BetPoint.DontComePoint5 },
+    { point: BetPoint.DontComePoint6 },
+    { point: BetPoint.DontComePoint8 },
+    { point: BetPoint.DontComePoint9 },
+    { point: BetPoint.DontComePoint10 },
   ];
 
-  testPoints.forEach(({ roll, point }) => {
+  testPoints.forEach(({ point }) => {
     bets.addBet(BetPoint.DontCome, 100);
     bets.moveDCBet(point);
     t.equal(bets[BetPoint.DontCome].amount, 0);
@@ -122,4 +122,3 @@ test("moveDCBet does nothing for invalid point numbers", (t) => {
   t.equal(bets[BetPoint.DontCome].amount, 100);
   t.end();
 });
-

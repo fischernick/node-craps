@@ -10,7 +10,7 @@
     "tap-file": "NODE_ENV=test tap test/*.test.ts  --output-file=results.tap",
     "fix": "standard --fix",
     "format": "prettier --write \"**/*.{ts,js,json}\"",
-    "lint": "eslint \"**/*.{ts,js}\" --fix",
+    "lint": "eslint \"**/*.ts\" --fix",
     "build": "tsc",
     "start": "node dist/hands.js",
     "dev": "npx tsx src/hands.ts",

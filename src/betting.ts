@@ -80,7 +80,7 @@ export function dontComeWithPlaceBets(opts: HandOptions): BetDictionary {
   // 15 5&9
   // 18 6&8
   // dc 60
-  const { rules, hand, bets } = opts;
+  const { hand, bets } = opts;
   const theseBets = bets ?? new BetDictionary();
 
   // is there any pointed/numbered don't come bet

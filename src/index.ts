@@ -8,6 +8,7 @@ import {
   DiceResult,
   BetPoint,
   Payout,
+  Rules,
 } from "./consts.js";
 import { BetDictionary } from "./bets.js";
 import {
@@ -73,11 +74,11 @@ export type RollOptions = {
 };
 
 export function playHand(
-  rules: any,
+  rules: Rules,
   bettingStrategyName: BettingStrategy,
   roll = rollD6,
   opts: RollOptions = { displayTables: false },
-): any {
+): { history: Result[]; balance: number } {
   const history = [];
   let balance = 0;
 

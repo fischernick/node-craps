@@ -1,6 +1,6 @@
 import { playHand, rollD6 } from "./index.js";
 import { BettingStrategy } from "./betting.js";
-import { HandResult, Summary, Result } from "./consts.js";
+import { HandResult, Summary, Result, Rules } from "./consts.js";
 import fs from "fs";
 import chalk from "chalk";
 
@@ -185,10 +185,12 @@ if (config.handsFile) {
 
 const sessionSummary = new Summary();
 sessionSummary.balance = startingBalance;
-const hands = [];
-const rules = {
+const hands: { history: Result[]; balance: number; summary: Summary }[] = [];
+const rules: Rules = {
   minBet: 5,
   maxOddsMultiple: {
+
+    0: 0,
     4: 3,
     5: 4,
     6: 5,
@@ -200,58 +202,52 @@ const rules = {
 
 console.log(`[table rules] minimum bet: $${rules.minBet}`);
 for (let i = 0; i < numHands; i++) {
-  let hand: {
-    summary: Summary;
-    balance: number;
-    history: Result[];
-  };
+  const summary: Summary = new Summary();
 
-  hand = playHand(rules, config.bettingStrategy, roll, {
+  const hand = playHand(rules, config.bettingStrategy, roll, {
     displayTables: config.displayTables,
   });
 
-  hand.summary = new Summary();
-
   sessionSummary.balance += hand.balance;
-  hand.summary.balance = hand.balance;
+  summary.balance = hand.balance;
 
   hand.history.reduce((memo: Summary, roll: Result) => {
     memo.rollCount++;
-    hand.summary.rollCount++;
+    summary.rollCount++;
     const distObj = memo.dist?.get(roll.diceSum);
     if (distObj) distObj.ct++;
 
     switch (roll.result) {
       case HandResult.NEUTRAL:
         memo.neutrals++;
-        hand.summary.neutrals++;
+        summary.neutrals++;
         break;
       case HandResult.POINT_SET:
         memo.pointsSet++;
-        hand.summary.pointsSet++;
+        summary.pointsSet++;
         break;
       case HandResult.POINT_WIN:
         memo.pointsWon++;
-        hand.summary.pointsWon++;
+        summary.pointsWon++;
         break;
       case HandResult.COMEOUT_WIN:
         memo.comeOutWins++;
-        hand.summary.comeOutWins++;
+        summary.comeOutWins++;
         memo.netComeOutWins++;
-        hand.summary.netComeOutWins++;
+        summary.netComeOutWins++;
         break;
       case HandResult.COMEOUT_LOSS:
         memo.comeOutLosses++;
-        hand.summary.comeOutLosses++;
+        summary.comeOutLosses++;
         memo.netComeOutWins--;
-        hand.summary.netComeOutWins--;
+        summary.netComeOutWins--;
         break;
     }
 
     return memo;
   }, sessionSummary);
 
-  hands.push(hand);
+  hands.push({ history: hand.history, balance: hand.balance, summary });
 }
 
 sessionSummary.handCount = hands.length;
@@ -325,54 +321,63 @@ console.log(`│ Neutrals:         │ ${psCt(sessionSummary.neutrals, 8)} │`)
 console.log(`│ Hand Count:       │ ${psCt(sessionSummary.handCount, 8)} │`);
 console.log(`└───────────────────┴──────────┘`);
 
-if (showDetail) {
+export const buildHandsSummary = (hands: any[], handCount: number, handsPerRow: number): string[] => {
   const pr = (s: string): string => s.padEnd(19);
   const pd = (s: string): string => s.padStart(6);
+
+  const handsSummary = [];
+  handsSummary.push("┌─────────────────────");
+  handsSummary.push("│ " + pr("HAND"));
+  handsSummary.push("│ " + pr("Balance:"));
+  handsSummary.push("│ " + pr("Roll Count:"));
+  handsSummary.push("│ " + pr("Points Set:"));
+  handsSummary.push("│ " + pr("Points Won:"));
+  handsSummary.push("│ " + pr("Come Out Wins:"));
+  handsSummary.push("│ " + pr("Come Out Losses:"));
+  handsSummary.push("│ " + pr("Net Come Out Wins:"));
+  handsSummary.push("│ " + pr("Neutrals:"));
+  handsSummary.push("└─────────────────────");
+
+  let currentHandCount = handCount;
+  for (let i = 0; i < handsPerRow && currentHandCount < hands.length; i++) {
+    const hand = hands[currentHandCount++];
+    delete hand.summary.dist;
+    let sfx = (n: number): string => { return ""; }
+
+    // if this is the last time through the loop, set the suffix to the appropriate row closing character
+    if (!(i + 1 < handsPerRow && currentHandCount < hands.length)) {
+      sfx = (n: number): string => {
+        if (n === 0) { return "┐"; }
+        if (n === 10) { return "┘"; }
+        return " │";
+      }
+    }
+
+    handsSummary[0] += "┬───────" + sfx(0);
+    handsSummary[1] += " │" + pd(currentHandCount.toString()) + sfx(1);
+    handsSummary[2] += " │" + pd("$" + hand.summary.balance.toString()) + sfx(2);
+    handsSummary[3] += " │" + pd(hand.summary.rollCount.toString()) + sfx(3);
+    handsSummary[4] += " │" + pd(hand.summary.pointsSet.toString()) + sfx(4);
+    handsSummary[5] += " │" + pd(hand.summary.pointsWon.toString()) + sfx(5);
+    handsSummary[6] += " │" + pd(hand.summary.comeOutWins.toString()) + sfx(6);
+    handsSummary[7] += " │" + pd(hand.summary.comeOutLosses.toString()) + sfx(7);
+    handsSummary[8] += " │" + pd(hand.summary.netComeOutWins.toString()) + sfx(8);
+    handsSummary[9] += " │" + pd(hand.summary.neutrals.toString()) + sfx(9);
+    handsSummary[10] += "┴───────" + sfx(10);
+  }
+
+  return handsSummary;
+}
+
+if (showDetail) {
 
   let row = 0;
   let handCount = 0;
   const handsPerRow = 15;
+
   while (row <= hands.length / handsPerRow && handCount < hands.length) {
-    const handsSummary = [];
-    //───────┬───────┬───────┬───────┬───────┐
-    //───────┴───────┴───────┴───────┴───────┘
-    handsSummary.push("┌─────────────────────");
-    handsSummary.push("│ " + pr("HAND"));
-    handsSummary.push("│ " + pr("Balance:"));
-    handsSummary.push("│ " + pr("Roll Count:"));
-    handsSummary.push("│ " + pr("Points Set:"));
-    handsSummary.push("│ " + pr("Points Won:"));
-    handsSummary.push("│ " + pr("Come Out Wins:"));
-    handsSummary.push("│ " + pr("Come Out Losses:"));
-    handsSummary.push("│ " + pr("Net Come Out Wins:"));
-    handsSummary.push("│ " + pr("Neutrals:"));
-    handsSummary.push("└─────────────────────");
-    for (let i = 0; i < handsPerRow && handCount < hands.length; i++) {
-      const hand = hands[handCount++];
-      delete hand.summary.dist;
-      handsSummary[0] += "┬───────";
-      handsSummary[1] += " │" + pd(handCount.toString());
-      handsSummary[2] += " │" + pd("$" + hand.summary.balance.toString());
-      handsSummary[3] += " │" + pd(hand.summary.rollCount.toString());
-      handsSummary[4] += " │" + pd(hand.summary.pointsSet.toString());
-      handsSummary[5] += " │" + pd(hand.summary.pointsWon.toString());
-      handsSummary[6] += " │" + pd(hand.summary.comeOutWins.toString());
-      handsSummary[7] += " │" + pd(hand.summary.comeOutLosses.toString());
-      handsSummary[8] += " │" + pd(hand.summary.netComeOutWins.toString());
-      handsSummary[9] += " │" + pd(hand.summary.neutrals.toString());
-      handsSummary[10] += "┴───────";
-    }
-    handsSummary[0] += "┐";
-    handsSummary[1] += " │";
-    handsSummary[2] += " │";
-    handsSummary[3] += " │";
-    handsSummary[4] += " │";
-    handsSummary[5] += " │";
-    handsSummary[6] += " │";
-    handsSummary[7] += " │";
-    handsSummary[8] += " │";
-    handsSummary[9] += " │";
-    handsSummary[10] += "┘";
+    const handsSummary = buildHandsSummary(hands, handCount, handsPerRow);
+    handCount += Math.min(handsPerRow, hands.length - handCount);
 
     for (let i = 0; i < handsSummary.length; i++) {
       console.log(handsSummary[i]);
