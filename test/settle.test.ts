@@ -14,7 +14,6 @@ import { dontComeBets, passLine, passOdds, placeBets } from "../src/settle.js";
 const defaultRules: Rules = {
   minBet: 5,
   maxOddsMultiple: {
-    [Point.UNDEF]: 0,
     [Point.OFF]: 0,
     [Point.FOUR]: 3,
     [Point.FIVE]: 4,

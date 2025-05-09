@@ -4,14 +4,6 @@ import { BetPoint, Point } from "../src/consts.ts";
 import { BetDictionary } from "../src/bets.ts";
 
 test("build header line", (suite) => {
-  suite.test("Point.UNDEF", (t) => {
-    const headerLine = buildHeaderLine(Point.UNDEF);
-    t.equal(
-      headerLine,
-      " \x1b[93m*\x1b[39mDC  ┃   4  ┃   5  ┃   6  ┃   8  ┃   9  ┃  10  ┃",
-    );
-    t.end();
-  });
 
   suite.test("Point.OFF", (t) => {
     const headerLine = buildHeaderLine(Point.OFF);

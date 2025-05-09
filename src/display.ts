@@ -18,7 +18,7 @@ export function buildHeaderLine(point: Point): string {
 
   points.forEach((p, i) => {
     const isPoint =
-      point === pointValues[i] || (i === 0 && point === Point.UNDEF);
+      point === pointValues[i] || (i === 0 && point === Point.OFF);
     const pointText = p.padStart(2, " ");
     headerLine += isPoint
       ? ` ${chalk.yellowBright("*")}${pointText}  ┃`

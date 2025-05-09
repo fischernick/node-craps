@@ -44,7 +44,7 @@ test("comeout", function (suite) {
       die1: DieResult.ONE,
       die2: DieResult.ONE,
       diceSum: DiceResult.TWO,
-      point: Point.UNDEF,
+      point: Point.OFF,
     };
 
     const result = lib.shoot(handState, [2, 1]);
@@ -64,7 +64,7 @@ test("comeout", function (suite) {
       die1: DieResult.ONE,
       die2: DieResult.ONE,
       diceSum: DiceResult.TWO,
-      point: Point.UNDEF,
+      point: Point.OFF,
     };
 
     const result = lib.shoot(handState, [6, 6]);
@@ -84,7 +84,7 @@ test("comeout", function (suite) {
       die1: DieResult.ONE,
       die2: DieResult.ONE,
       diceSum: DiceResult.TWO,
-      point: Point.UNDEF,
+      point: Point.OFF,
     };
 
     const result = lib.shoot(handState, [5, 2]);
@@ -104,7 +104,7 @@ test("comeout", function (suite) {
       die1: DieResult.ONE,
       die2: DieResult.ONE,
       diceSum: DiceResult.TWO,
-      point: Point.UNDEF,
+      point: Point.OFF,
     };
 
     const result = lib.shoot(handState, [3, 1]);
@@ -125,7 +125,7 @@ test("comeout", function (suite) {
       die1: DieResult.ONE,
       die2: DieResult.ONE,
       diceSum: DiceResult.TWO,
-      point: Point.UNDEF,
+      point: Point.OFF,
     };
 
     const result = lib.shoot(handState, [3, 2]);
@@ -146,7 +146,7 @@ test("comeout", function (suite) {
       die1: DieResult.ONE,
       die2: DieResult.ONE,
       diceSum: DiceResult.TWO,
-      point: Point.UNDEF,
+      point: Point.OFF,
     };
 
     const result = lib.shoot(handState, [4, 2]);
@@ -167,7 +167,7 @@ test("comeout", function (suite) {
       die1: DieResult.ONE,
       die2: DieResult.ONE,
       diceSum: DiceResult.TWO,
-      point: Point.UNDEF,
+      point: Point.OFF,
     };
 
     const result = lib.shoot(handState, [6, 2]);
@@ -188,7 +188,7 @@ test("comeout", function (suite) {
       die1: DieResult.ONE,
       die2: DieResult.ONE,
       diceSum: DiceResult.TWO,
-      point: Point.UNDEF,
+      point: Point.OFF,
     };
 
     const result = lib.shoot(handState, [6, 3]);
@@ -209,7 +209,7 @@ test("comeout", function (suite) {
       die1: DieResult.ONE,
       die2: DieResult.ONE,
       diceSum: DiceResult.TWO,
-      point: Point.UNDEF,
+      point: Point.OFF,
     };
 
     const result = lib.shoot(handState, [6, 4]);
