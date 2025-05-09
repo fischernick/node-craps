@@ -24,7 +24,6 @@ export enum DiceResult {
 }
 
 export enum Point {
-
   OFF = 0,
   FOUR = 4,
   FIVE = 5,

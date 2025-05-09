@@ -6,16 +6,11 @@ import {
   diceResultAsPoint,
   DieResult,
   DiceResult,
-  BetPoint,
   Payout,
   Rules,
 } from "./consts.js";
 import { BetDictionary } from "./bets.js";
-import {
-  BettingStrategy,
-  BettingStrategyName,
-  getBettingStrategy,
-} from "./betting.js";
+import { BettingStrategy, getBettingStrategy } from "./betting.js";
 import { displayTable } from "./display.js";
 
 export function rollD6(): number {

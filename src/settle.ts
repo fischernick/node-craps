@@ -293,7 +293,7 @@ export function getPayout(betPoint: BetPoint, diceSum: DiceResult) {
 export function settleAllBets(
   bets: BetDictionary,
   hand: Result,
-  rules: any,
+  rules: Rules,
 ): { bets: BetDictionary; newPayouts?: Payout[]; actions?: string[] } {
   const payouts: Payout[] = [];
 

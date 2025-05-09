@@ -1,6 +1,5 @@
 import { test } from "tap";
 import {
-  BetPoint,
   DiceResult,
   DieResult,
   HandResult,
@@ -8,7 +7,6 @@ import {
   Result,
 } from "../src/consts.js";
 import * as lib from "../src/index.js";
-import { BetDictionary } from "../src/bets.js";
 
 test("roll d6", function (t) {
   const result = lib.rollD6();
